@@ -19,7 +19,6 @@ public class PrenotazioneResponse implements Serializable {
     @Serial
     private static final long serialVersionUID = 5806744543180005840L;
 
-    //todo: per commit
     String codicePrenotazione;
     String groupId;
     BigDecimal prezzoCamera;
