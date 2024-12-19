@@ -8,9 +8,6 @@ import java.io.Serial;
 import java.io.Serializable;
 
 @EqualsAndHashCode(callSuper = true)
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PreventivoResponse extends PrezzoCameraDTO implements Serializable {
     @Serial
