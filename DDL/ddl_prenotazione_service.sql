@@ -28,7 +28,8 @@ CREATE TABLE IF NOT EXISTS prenotazione_service.preventivo (
     lista_id_fascia_eta INTEGER ARRAY NOT NULL, -- Array di ID fascia età
     check_in TIMESTAMP NOT NULL, -- Data di check-in
     check_out TIMESTAMP NOT NULL, -- Data di check-out
-    id_prezzo_camera INTEGER NOT NULL -- ID del prezzo della camera
+    prezzo_totale DECIMAL(10,2) NOT NULL, -- ID del prezzo della camera
+    numero_camera VARCHAR(5)
 );
 
 

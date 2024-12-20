@@ -33,7 +33,10 @@ public class Preventivo implements Serializable {
     @Column(name = "ID_TIPO_CAMERA", nullable = false)
     Integer idTipoCamera;
 
-    @Column(name = "LISTA_ID_FASCIA_ETA")
+    @Column(name = "NUMERO_CAMERA", nullable = false)
+    String numeroCamera;
+
+    @Column(name = "LISTA_ID_FASCIA_ETA", nullable = false)
     List<Integer> listaIdFasciaEta;
 
     @Column(name = "CHECK_IN", nullable = false)
@@ -42,6 +45,6 @@ public class Preventivo implements Serializable {
     @Column(name = "CHECK_OUT", nullable = false)
     LocalDateTime checkOut;
 
-    @Column(name = "ID_PREZZO_CAMERA", nullable = false)
-    BigDecimal prezzoCamera;
+    @Column(name = "PREZZO_TOTALE", nullable = false)
+    BigDecimal prezzoTotale;
 }
