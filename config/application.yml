@@ -2,7 +2,7 @@ spring:
   application:
     name: prenotazione_service
   datasource:
-    url: jdbc:h2:~/albergo
+    url: jdbc:h2:tcp://localhost:9092/~/albergo
     username: sa
     password:
     driver-class-name: org.h2.Driver
@@ -19,3 +19,13 @@ spring:
 server:
   servlet:
     context-path: /api
+
+  port: 8081
+
+external-call:
+  util:
+    url: http://localhost:8080/api/util
+    getPrezzoCamera: /get-prezzi-camere
+
+  name:
+    reservation: reservations
