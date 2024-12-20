@@ -9,8 +9,14 @@ import java.io.Serializable;
 
 @EqualsAndHashCode(callSuper = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class PreventivoResponse extends PrezzoCameraDTO implements Serializable {
+
     @Serial
     private static final long serialVersionUID = 1564505570856586138L;
+
+    Integer id;
 
 }

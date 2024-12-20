@@ -1,7 +1,9 @@
 package it.nesea.prenotazione_service.controller;
 
 import it.nesea.albergo.common_lib.dto.response.CustomResponse;
+import it.nesea.prenotazione_service.dto.request.PrenotazioneRequest;
 import it.nesea.prenotazione_service.dto.request.PreventivoRequest;
+import it.nesea.prenotazione_service.dto.response.PrenotazioneResponse;
 import it.nesea.prenotazione_service.dto.response.PreventivoResponse;
 import it.nesea.prenotazione_service.service.PrenotazioneService;
 import jakarta.validation.Valid;
@@ -22,6 +24,11 @@ public class PrenotazioneController {
     @PostMapping(path = "/richiedi-preventivo")
     public ResponseEntity<CustomResponse<PreventivoResponse>> richiediPreventivo(@Valid @RequestBody PreventivoRequest request) {
         return ResponseEntity.ok(CustomResponse.success(prenotazioneService.richiediPreventivo(request)));
+    }
+
+    @PostMapping(path = "/prenota")
+    public ResponseEntity<CustomResponse<PrenotazioneResponse>> prenota(@Valid @RequestBody PrenotazioneRequest request) {
+        return ResponseEntity.ok(CustomResponse.success(prenotazioneService.prenota(request)));
     }
 
 }

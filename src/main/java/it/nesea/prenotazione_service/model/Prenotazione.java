@@ -29,44 +29,19 @@ public class Prenotazione implements Serializable {
     @Column(name = "ID", nullable = false, precision = 4)
     Integer id;
 
-    @Column(name = "CODICE_PRENOTAZIONE", nullable = false, precision = 16)
+    @Column(name = "CODICE_PRENOTAZIONE", nullable = false, length = 16)
     String codicePrenotazione;
-
-    @Column(name = "FASCIA_ETA", nullable = false)
-    List<Integer> listaIdFasciaEta;
-
-    @Column(name = "ID_TIPO_STANZA", nullable = false, precision = 1)
-    Integer tipoStanza;
-
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "CHECK_IN", nullable = false)
-    LocalDateTime checkIn;
-
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "CHECK_OUT", nullable = false)
-    LocalDateTime checkOut;
 
     @Column(name = "ID_UTENTE", nullable = false, precision = 4)
     Integer idUtente;
 
-    @Column(name = "GROUP_ID", nullable = false)
+    @Column(name = "GROUP_ID", nullable = false, length = 50)
     String groupId;
 
-    @Column(name = "PREZZO_CAMERA", nullable = false)
-    BigDecimal prezzoCamera;
+    @Column(name = "ID_METODO_PAGAMENTO", nullable = false, precision = 1)
+    Integer idMetodoPagamento;
 
-    @Column(name = "METODO_PAGAMENTO", nullable = false, precision = 1)
-    Integer idMetodoPagamento; //todo: fara riferimento alla tabella del microservizio "pagamento"
-
-
-
-
-
-
-
-
-
-
-
-
+    @ManyToOne
+    @JoinColumn(name = "ID_PREVENTIVO", referencedColumnName = "ID")
+    Preventivo preventivo;
 }

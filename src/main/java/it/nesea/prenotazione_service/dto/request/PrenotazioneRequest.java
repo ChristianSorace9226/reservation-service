@@ -28,4 +28,7 @@ public class PrenotazioneRequest implements Serializable {
     @NotNull(message = "scegli il metodo di pagamento")
     Integer idMetodoPagamento;
 
+    String groupId;
+
+
 }

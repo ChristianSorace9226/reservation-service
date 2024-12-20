@@ -9,6 +9,7 @@ import lombok.experimental.FieldDefaults;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -19,6 +20,7 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Preventivo implements Serializable {
+
     @Serial
     private static final long serialVersionUID = -5369174195463103251L;
 
@@ -31,7 +33,7 @@ public class Preventivo implements Serializable {
     @Column(name = "ID_TIPO_CAMERA", nullable = false)
     Integer idTipoCamera;
 
-    @Column(name = "LISTA_ID_FASCIA_ETA", nullable = false)
+    @Column(name = "LISTA_ID_FASCIA_ETA")
     List<Integer> listaIdFasciaEta;
 
     @Column(name = "CHECK_IN", nullable = false)
@@ -41,5 +43,5 @@ public class Preventivo implements Serializable {
     LocalDateTime checkOut;
 
     @Column(name = "ID_PREZZO_CAMERA", nullable = false)
-    Integer idPrezzoCamera; // Si riferisce all'id del record PrezzoCameraDTO (di common-lib)
+    BigDecimal prezzoCamera;
 }

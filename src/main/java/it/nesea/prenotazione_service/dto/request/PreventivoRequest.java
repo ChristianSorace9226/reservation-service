@@ -22,7 +22,7 @@ public class PreventivoRequest implements Serializable {
     private static final long serialVersionUID = -1036202629981122611L;
 
     @NotNull(message = "devi specificare che tipo di stanza vuoi prenotare")
-    Integer idTipoStanza;
+    Integer idTipoCamera;
 
     @NotNull(message = "le fasce età delle persone non devono essere null")
     @NotEmpty(message = "le fasce età delle persone devono essere fornite")
@@ -33,4 +33,5 @@ public class PreventivoRequest implements Serializable {
 
     @NotNull(message = "è necessaria la data del check-out")
     LocalDateTime checkOut;
+
 }

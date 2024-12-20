@@ -23,4 +23,5 @@ public class PrenotazioneResponse implements Serializable {
     String groupId;
     BigDecimal prezzoCamera;
 
+
 }
