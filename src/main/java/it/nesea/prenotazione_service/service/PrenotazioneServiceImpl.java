@@ -130,8 +130,6 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
         }
         PrenotazioneResponse response = new PrenotazioneResponse();
 
-        // todo: utente esistente
-
         Optional<Preventivo> ricercaPreventivo = preventivoRepository.findById(request.getIdPreventivo());
         if (ricercaPreventivo.isEmpty()) {
             throw new NotFoundException("Preventivo non trovato");
