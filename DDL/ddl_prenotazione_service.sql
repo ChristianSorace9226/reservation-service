@@ -5,6 +5,9 @@ CREATE SCHEMA IF NOT EXISTS prenotazione_service;
 DROP TABLE IF EXISTS prenotazione_service.prenotazione;
 DROP TABLE IF EXISTS prenotazione_service.preventivo;
 
+DROP SEQUENCE IF EXISTS prenotazione_service.seq_preventivo;
+DROP SEQUENCE IF EXISTS prenotazione_service.seq_prenotazione;
+
 
 -- Creazione sequenze per l'auto incremento degli ID
 CREATE SEQUENCE IF NOT EXISTS prenotazione_service.seq_preventivo
@@ -25,6 +28,7 @@ NOCYCLE;
 CREATE TABLE IF NOT EXISTS prenotazione_service.preventivo (
     id INTEGER NOT NULL DEFAULT NEXT VALUE FOR prenotazione_service.seq_preventivo PRIMARY KEY,
     id_tipo_camera INTEGER NOT NULL, -- ID del tipo di camera
+    group_id VARCHAR(50) NOT NULL, -- Group ID per la prenotazione
     lista_id_fascia_eta INTEGER ARRAY NOT NULL, -- Array di ID fascia età
     check_in TIMESTAMP NOT NULL, -- Data di check-in
     check_out TIMESTAMP NOT NULL, -- Data di check-out
@@ -38,7 +42,6 @@ CREATE TABLE IF NOT EXISTS prenotazione_service.prenotazione (
     id INTEGER NOT NULL DEFAULT NEXT VALUE FOR prenotazione_service.seq_prenotazione PRIMARY KEY,
     codice_prenotazione VARCHAR(100) NOT NULL, -- Codice della prenotazione
     id_utente INTEGER NOT NULL, -- ID dell'utente che ha effettuato la prenotazione
-    group_id VARCHAR(50) NOT NULL, -- Group ID per la prenotazione
     id_metodo_pagamento INTEGER NOT NULL, -- ID del metodo di pagamento
     id_preventivo INTEGER, -- Riferimento all'ID del preventivo
     FOREIGN KEY (id_preventivo) REFERENCES prenotazione_service.preventivo(id) -- Aggiunta della chiave esterna

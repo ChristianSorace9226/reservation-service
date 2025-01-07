@@ -32,4 +32,7 @@ public class PreventivoRequest implements Serializable {
 
     @NotNull(message = "è necessaria la data del check-out")
     LocalDateTime checkOut;
+
+    String groupId;
+
 }

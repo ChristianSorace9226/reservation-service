@@ -23,9 +23,16 @@ server:
   port: 8081
 
 external-call:
-  util:
-    url: http://localhost:8080/api/util
-    getPrezzoCamera: /get-prezzi-camere
+  hotel:
+    util:
+      url: http://localhost:8080/api/util
+      getPrezzoCamera: /get-prezzi-camere
+
+  user:
+    util:
+      url: http://localhost:8083/api/util
+      exists: /exists
 
   name:
-    reservation: reservations
+    hotel: hotel
+    user: user

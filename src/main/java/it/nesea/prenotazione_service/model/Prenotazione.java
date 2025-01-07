@@ -32,9 +32,6 @@ public class Prenotazione implements Serializable {
     @Column(name = "ID_UTENTE", nullable = false, precision = 4)
     Integer idUtente;
 
-    @Column(name = "GROUP_ID", nullable = false, length = 50)
-    String groupId;
-
     @Column(name = "ID_METODO_PAGAMENTO", nullable = false, precision = 1)
     Integer idMetodoPagamento;
 

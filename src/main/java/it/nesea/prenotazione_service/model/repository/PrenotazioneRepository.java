@@ -8,5 +8,4 @@ import java.util.Optional;
 
 @Repository
 public interface PrenotazioneRepository extends JpaRepository<Prenotazione, Integer> {
-    Optional<Prenotazione> findPrenotazioneByGroupId(String groupId);
 }

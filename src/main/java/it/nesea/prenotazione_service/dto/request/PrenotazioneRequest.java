@@ -23,12 +23,9 @@ public class PrenotazioneRequest implements Serializable {
     Integer idUtente;
 
     @NotNull(message = "inserisci l'id del tuo preventivo")
-    Integer idPreventivoResponse;
+    Integer idPreventivo;
 
     @NotNull(message = "scegli il metodo di pagamento")
     Integer idMetodoPagamento;
-
-    String groupId;
-
 
 }

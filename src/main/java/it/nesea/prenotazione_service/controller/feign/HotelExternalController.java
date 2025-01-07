@@ -9,10 +9,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
-@FeignClient(name = "${external-call.name.reservation}", url = "${external-call.util.url}")
-public interface ExternalController {
+@FeignClient(name = "${external-call.name.hotel}", url = "${external-call.hotel.util.url}")
+public interface HotelExternalController {
 
-    @PostMapping("${external-call.util.getPrezzoCamera}")
+    @PostMapping("${external-call.hotel.util.getPrezzoCamera}")
     ResponseEntity<CustomResponse<List<PrezzoCameraDTO>>> getListaPrezzoCamera(@RequestBody List<Integer> listaEta);
 
 }

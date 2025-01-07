@@ -47,4 +47,7 @@ public class Preventivo implements Serializable {
 
     @Column(name = "PREZZO_TOTALE", nullable = false)
     BigDecimal prezzoTotale;
+
+    @Column(name = "GROUP_ID", nullable = false, length = 50)
+    String groupId;
 }
