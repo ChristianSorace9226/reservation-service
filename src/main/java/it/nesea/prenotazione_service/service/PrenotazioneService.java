@@ -7,5 +7,6 @@ import it.nesea.prenotazione_service.dto.response.PreventivoResponse;
 
 public interface PrenotazioneService {
     PreventivoResponse richiediPreventivo(PreventivoRequest request);
+
     PrenotazioneResponse prenota(PrenotazioneRequest request);
 }

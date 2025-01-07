@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface PrenotazioneRepository extends JpaRepository<Prenotazione,Integer> {
+public interface PrenotazioneRepository extends JpaRepository<Prenotazione, Integer> {
     Optional<Prenotazione> findPrenotazioneByGroupId(String groupId);
 }
