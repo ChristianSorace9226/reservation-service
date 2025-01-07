@@ -125,7 +125,7 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
     public PrenotazioneResponse prenota(PrenotazioneRequest request) {
         log.info("Oggetto request in input: [{}]", request);
 
-        if (!userExternalController.checkUtente(request.getIdUtente()).getBody().getResponse()){
+        if (!userExternalController.checkUtente(request.getIdUtente()).getBody().getResponse()) {
             throw new NotFoundException("Utente non valido");
         }
         PrenotazioneResponse response = new PrenotazioneResponse();
