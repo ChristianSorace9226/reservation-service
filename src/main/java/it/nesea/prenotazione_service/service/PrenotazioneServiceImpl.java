@@ -56,8 +56,14 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
                 cb.greaterThanOrEqualTo(prenotazioneRoot.get("preventivo").get("checkOut"), request.getCheckIn())
         );
 
+        Predicate idTipoCamera = cb.equal(prenotazioneRoot.get("preventivo").get("idTipoCamera"), request.getIdTipoCamera());
+
         // Seleziono tutte le camere coinvolte nelle prenotazioni che si sovrappongono
         prenotazioneQuery.select(prenotazioneRoot.get("preventivo").get("numeroCamera")).where(dateOverlap);
+        if (idTipoCamera != null) {
+            prenotazioneQuery.where(idTipoCamera);
+        }
+        //todo: gestire idTipoCamera in base al numero occupanti (fornire la camera piu piccola possibile che può ospitare il numero persone richiesto)
         List<String> camereNonDisponibili = entityManager.createQuery(prenotazioneQuery).getResultList();
 
         // Chiamo l'ExternalController per ottenere i prezzi delle camere
