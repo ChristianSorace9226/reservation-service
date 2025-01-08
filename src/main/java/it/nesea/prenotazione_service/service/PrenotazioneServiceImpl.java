@@ -109,16 +109,9 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
         preventivo.setGroupId(newGroupId);
         preventivoRepository.save(preventivo);
 
-        // Costruisco la risposta
-        PreventivoResponse response = new PreventivoResponse();
-        response.setNumeroOccupanti(prezzoCamera.getNumeroOccupanti());
-        response.setIdTipo(prezzoCamera.getIdTipo());
-        response.setPrezziAPersona(prezzoCamera.getPrezziAPersona());
-        response.setNumeroCamera(prezzoCamera.getNumeroCamera());
-        response.setPrezzoTotale(prezzoTotale);
-        response.setId(preventivo.getId());
-        log.info("Preventivo calcolato: {}", response);
-        return response;
+        return new PreventivoResponse.PreventivoResponseBuilder()
+                .numeroOccupanti(prezzoCamera.getNumeroOccupanti()).idTipo(prezzoCamera.getIdTipo()).prezziAPersona(prezzoCamera.getPrezziAPersona())
+                .numeroCamera(prezzoCamera.getNumeroCamera()).prezzoTotale(prezzoTotale).id(preventivo.getId()).build();
     }
 
     @Override
@@ -128,7 +121,6 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
         if (!userExternalController.checkUtente(request.getIdUtente()).getBody().getResponse()) {
             throw new NotFoundException("Utente non valido");
         }
-        PrenotazioneResponse response = new PrenotazioneResponse();
 
         Optional<Preventivo> ricercaPreventivo = preventivoRepository.findById(request.getIdPreventivo());
         if (ricercaPreventivo.isEmpty()) {
@@ -145,10 +137,8 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
 
         prenotazioneRepository.save(nuovaPrenotazione);
 
-        response.setCodicePrenotazione(nuovaPrenotazione.getCodicePrenotazione());
-        response.setPrezzoCamera(preventivoEsistente.getPrezzoTotale());
-        response.setGroupId(preventivoEsistente.getGroupId());
-
-        return response;
+        return new PrenotazioneResponse.PrenotazioneResponseBuilder()
+                .codicePrenotazione(nuovaPrenotazione.getCodicePrenotazione())
+                .groupId(preventivoEsistente.getGroupId()).prezzoCamera(preventivoEsistente.getPrezzoTotale()).build();
     }
 }
