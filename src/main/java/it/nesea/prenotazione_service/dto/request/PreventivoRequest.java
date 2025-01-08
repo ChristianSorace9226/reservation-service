@@ -1,5 +1,7 @@
 package it.nesea.prenotazione_service.dto.request;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
@@ -21,6 +23,8 @@ public class PreventivoRequest implements Serializable {
     @Serial
     private static final long serialVersionUID = -1036202629981122611L;
 
+    @Min(value = 1)
+    @Max(value = 4)
     Integer idTipoCamera;
 
     @NotNull(message = "le fasce età delle persone non devono essere null")

@@ -36,3 +36,8 @@ external-call:
   name:
     hotel: hotel
     user: user
+
+internal:
+  validation:
+    ChronologicalDates:
+      errorMessage: Data non valida

@@ -50,4 +50,7 @@ public class Preventivo implements Serializable {
 
     @Column(name = "GROUP_ID", nullable = false, length = 50)
     String groupId;
+
+    @Column(name = "PRENOTATO", nullable = false)
+    Boolean prenotato;
 }

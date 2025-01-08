@@ -33,7 +33,8 @@ CREATE TABLE IF NOT EXISTS prenotazione_service.preventivo (
     check_in TIMESTAMP NOT NULL, -- Data di check-in
     check_out TIMESTAMP NOT NULL, -- Data di check-out
     prezzo_totale DECIMAL(10,2) NOT NULL, -- ID del prezzo della camera
-    numero_camera VARCHAR(5)
+    numero_camera VARCHAR(5),
+    prenotato BOOLEAN NOT NULL
 );
 
 

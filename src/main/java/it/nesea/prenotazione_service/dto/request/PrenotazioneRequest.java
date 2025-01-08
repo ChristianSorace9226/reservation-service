@@ -1,5 +1,7 @@
 package it.nesea.prenotazione_service.dto.request;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -25,6 +27,8 @@ public class PrenotazioneRequest implements Serializable {
     @NotNull(message = "inserisci l'id del tuo preventivo")
     Integer idPreventivo;
 
+    @Min(value = 1)
+    @Max(value = 2)
     @NotNull(message = "scegli il metodo di pagamento")
     Integer idMetodoPagamento;
 
