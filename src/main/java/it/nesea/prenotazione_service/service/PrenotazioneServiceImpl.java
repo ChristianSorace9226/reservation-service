@@ -47,7 +47,7 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
 
     @Override
     public PreventivoResponse richiediPreventivo(PreventivoRequest request) {
-        log.info("Richiesta preventivo con parametri: {}", request);
+        log.debug("Richiesta preventivo con parametri: {}", request);
 
         util.isDateValid(request.getCheckIn(), request.getCheckOut());
 
@@ -63,11 +63,13 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
 
         Predicate idTipoCameraPredicate = cb.conjunction();
         if (request.getIdTipoCamera() != null) {
+            log.debug("Ricevuta richiesta con selezione idTipoCamera: {}", request.getIdTipoCamera());
             idTipoCameraPredicate = cb.equal(preventivoRoot.get("idTipoCamera"), request.getIdTipoCamera());
         }
 
         Predicate groupIdPredicate = cb.conjunction();
         if (request.getGroupId() != null) {
+            log.debug("Ricevuta richiesta con selezione groupId: {}", request.getGroupId());
             groupIdPredicate = cb.equal(preventivoRoot.get("groupId"), request.getGroupId());
         }
 
@@ -75,7 +77,8 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
         List<Preventivo> preventiviPrenotati = entityManager.createQuery(preventivoQuery).getResultList();
 
         if (request.getGroupId() != null && preventiviPrenotati.isEmpty()) {
-            throw new BadRequestException("Il groupId fornito non esiste. Se desideri utilizzarlo, assicurati che sia già associato a una prenotazione esistente.");
+            log.error("Group id {} non associato a nessuna prenotazione esistente.", request.getGroupId());
+            throw new BadRequestException("Il groupId fornito non esiste. Se desideri utilizzarlo, assicurati che sia associato a una prenotazione esistente.");
         }
 
         List<PrezzoCameraDTO> prezzi = hotelExternalController.getListaPrezzoCamera(request.getListaIdFasciaEta()).getBody().getResponse();
@@ -85,12 +88,14 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
                 .toList();
 
         if (camereDisponibili.isEmpty()) {
+            log.error("Nessuna camera disponibile con capacità sufficiente.");
             throw new NotFoundException("Nessuna camera disponibile con capacità sufficiente.");
         }
 
         PrezzoCameraDTO prezzoCamera = camereDisponibili.stream()
                 .min(Comparator.comparingInt(camera -> Math.abs(camera.getIdTipo() - request.getListaIdFasciaEta().size())))
                 .orElseThrow(() -> new NotFoundException("Nessuna camera disponibile con capacità sufficiente."));
+        log.debug("Prezzario [{}] trovato per la richiesta [{}] ", prezzoCamera, request);
 
         BigDecimal prezzoTotale = prezzoCamera.getPrezzoTotale().multiply(
                 BigDecimal.valueOf(request.getCheckOut().getDayOfMonth() - request.getCheckIn().getDayOfMonth())
@@ -105,6 +110,7 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
         preventivo.setGroupId(request.getGroupId() != null ? request.getGroupId() : util.generaGroupId());
 
         preventivoRepository.save(preventivo);
+        log.debug("Preventivo [{}] creato con successo", preventivo);
 
         return new PreventivoResponse.PreventivoResponseBuilder()
                 .numeroOccupanti(preventivo.getListaIdFasciaEta().size())
@@ -118,10 +124,10 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
 
     @Override
     public PrenotazioneResponse prenota(PrenotazioneRequest request) {
-        log.info("Oggetto request in input: [{}]", request);
+        log.debug("Oggetto request in input: [{}]", request);
 
         if (!userExternalController.checkUtente(request.getIdUtente()).getBody().getResponse()) {
-            log.error("Oggetto request in input [{}] non valido", request);
+            log.error("Utente {} non valido", request.getIdUtente());
             throw new NotFoundException("Utente non valido");
         }
 
@@ -133,6 +139,7 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
         Preventivo preventivoEsistente = ricercaPreventivo.get();
 
         if (preventivoEsistente.getPrenotato()) {
+            log.error("Preventivo {} già prenotato", request.getIdPreventivo());
             throw new BadRequestException("Il preventivo che stai cercando di prenotare è già stato prenotato");
         }
 
@@ -145,7 +152,7 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
 
         prenotazioneRepository.save(nuovaPrenotazione);
         util.prenotaPreventivo(preventivoEsistente);
-        log.info("Preventivo [{}] prenotato", preventivoEsistente);
+        log.info("Preventivo [{}] prenotato con successo", preventivoEsistente);
 
         return new PrenotazioneResponse.PrenotazioneResponseBuilder()
                 .codicePrenotazione(nuovaPrenotazione.getCodicePrenotazione())
