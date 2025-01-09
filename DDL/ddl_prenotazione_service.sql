@@ -49,18 +49,4 @@ CREATE TABLE IF NOT EXISTS prenotazione_service.prenotazione (
 );
 
 
--- Inserimento di un preventivo fittizio
-INSERT INTO prenotazione_service.preventivo (
-    id_tipo_camera,
-    lista_id_fascia_eta,
-    check_in,
-    check_out,
-    id_prezzo_camera
-)
-VALUES (
-    1,  -- Esempio di ID tipo di camera
-    ARRAY[1, 2, 3],  -- Esempio di array di ID per la fascia età
-    '2024-12-25 14:00:00',  -- Data di check-in (formato TIMESTAMP)
-    '2024-12-30 10:00:00',  -- Data di check-out (formato TIMESTAMP)
-    100  -- Esempio di ID prezzo della camera
-);
+
