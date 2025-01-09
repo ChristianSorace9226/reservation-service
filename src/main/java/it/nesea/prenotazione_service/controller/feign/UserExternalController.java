@@ -9,6 +9,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(name = "${external-call.name.user}", url = "${external-call.user.util.url}")
 public interface UserExternalController {
 
-    @GetMapping("${external-call.user.util.exists}")
+    @GetMapping("${external-call.user.util.checkUtente}")
     ResponseEntity<CustomResponse<Boolean>> checkUtente(@RequestParam Integer idUtente);
 }

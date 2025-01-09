@@ -31,7 +31,7 @@ external-call:
   user:
     util:
       url: http://localhost:8083/api/util
-      exists: /exists
+      checkUtente: /checkUtente
 
   name:
     hotel: hotel
