@@ -29,7 +29,7 @@ public class PrenotazioneRequest implements Serializable {
 
     @Min(value = 1)
     @Max(value = 2)
-    @NotNull(message = "scegli il metodo di pagamento")
+    @NotNull(message = "scegli il metodo di pagamento tra 1 e 2")
     Integer idMetodoPagamento;
 
 }
