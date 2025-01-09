@@ -6,10 +6,11 @@ import it.nesea.prenotazione_service.model.Preventivo;
 import it.nesea.prenotazione_service.model.repository.PrenotazioneRepository;
 import it.nesea.prenotazione_service.model.repository.PreventivoRepository;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Component
+@Service
 public class FrontendUtilServiceImpl implements FrontendUtilService {
 
     private final PreventivoRepository preventivoRepository;
