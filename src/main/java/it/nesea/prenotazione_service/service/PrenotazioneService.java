@@ -9,4 +9,6 @@ public interface PrenotazioneService {
     PreventivoResponse richiediPreventivo(PreventivoRequest request);
 
     PrenotazioneResponse prenota(PrenotazioneRequest request);
+
+
 }

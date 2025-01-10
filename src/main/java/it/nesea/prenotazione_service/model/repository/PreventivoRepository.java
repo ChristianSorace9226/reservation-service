@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface PreventivoRepository extends JpaRepository<Preventivo, Integer> {
     Optional<Preventivo> findPreventivoByGroupId(String groupId);
 
+    Optional<Preventivo> findByGroupIdAndPrenotatoTrue(String groupId);
 }
