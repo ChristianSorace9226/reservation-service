@@ -16,4 +16,6 @@ public abstract class PreventivoMapper {
     public abstract Preventivo fromPrezzoCameraDTOToPreventivo(PrezzoCameraDTO prezzoCameraDTO);
 
     public abstract PreventivoResponse fromPrezzoCameraDTOToPreventivoResponse(PrezzoCameraDTO prezzarioCamera);
+
+    public abstract PreventivoResponse fromPreventivoToPreventivoResponse(Preventivo preventivo);
 }
