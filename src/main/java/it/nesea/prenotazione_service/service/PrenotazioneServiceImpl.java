@@ -13,22 +13,18 @@ import it.nesea.prenotazione_service.dto.response.PreventivoResponse;
 import it.nesea.prenotazione_service.mapper.PrenotazioneMapper;
 import it.nesea.prenotazione_service.mapper.PreventivoMapper;
 import it.nesea.prenotazione_service.model.Prenotazione;
+import it.nesea.prenotazione_service.model.PrenotazioneSave;
 import it.nesea.prenotazione_service.model.Preventivo;
-import it.nesea.prenotazione_service.model.StagioneEntity;
 import it.nesea.prenotazione_service.model.repository.PrenotazioneRepository;
 import it.nesea.prenotazione_service.model.repository.PreventivoRepository;
 import it.nesea.prenotazione_service.util.Util;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Root;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.chrono.ChronoLocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -75,7 +71,7 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
         nuovaPrenotazione.setPreventivo(preventivoEsistente);
         nuovaPrenotazione.setIdUtente(request.getIdUtente());
 
-        prenotazioneRepository.save(nuovaPrenotazione);
+//        prenotazioneRepository.save(nuovaPrenotazione);
         util.prenotaPreventivo(preventivoEsistente);
         log.info("Preventivo [{}] prenotato con successo", preventivoEsistente);
 
@@ -87,21 +83,39 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
     }
 
 
-    public PrenotazioneResponseSecondo prenotazione(PrenotazioneRequestSecondo request){
+    public PrenotazioneResponseSecondo prenotazione(PrenotazioneRequestSecondo request) {
         log.debug("Oggetto request in input: [{}]", request);
+
+        util.isDateValid(request.getCheckIn(), request.getCheckOut());
 
         if (!userExternalController.checkUtente(request.getIdUtente()).getBody().getResponse()) {
             log.error("Utente {} non valido", request.getIdUtente());
             throw new NotFoundException("Utente non valido");
         }
-        request = prenotazioneMapper.fromPreventivoRequestToPrenotazioneRequest(util.calcolaPrezzoFinale(request));
 
-        Optional<Prenotazione> prenotazioneEsistente = prenotazioneRepository.findByGroupId(request.getGroupId());
-        if (prenotazioneEsistente.isPresent()) {
-
+        if (request.getGroupId() != null) {
+            Optional<PrenotazioneSave> prenotazioneOptional = prenotazioneRepository.findByGroupId(request.getGroupId());
+            if (prenotazioneOptional.isEmpty()) {
+                log.error("Prenotazione con groupId {} non trovata", request.getGroupId());
+                throw new NotFoundException("Prenotazione con groupId non trovata");
+            }
+            PrenotazioneSave prenotazioneEsistente = prenotazioneOptional.get();
+            if ((prenotazioneEsistente.getIdTipoCamera() - request.getListaEta().size() < 0)) {
+                log.error("Il numero di persone da unire al gruppo eccede la capienza della camera");
+                throw new BadRequestException("Il numero di persone da unire al gruppo eccede la capienza della camera");
+            }
+            if (request.getCheckOut().isAfter(ChronoLocalDate.from(prenotazioneEsistente.getCheckOut()))){
+                log.error("La data di check-out non può essere successiva a quella della prenotazione esistente");
+                throw new BadRequestException("La data di check-out non può essere successiva a quella della prenotazione esistente");
+            }
+            List<Integer> etaEsistenti = prenotazioneEsistente.getListaEta();
+            etaEsistenti.addAll(request.getListaEta());
+            request.setListaEta(etaEsistenti);
         }
-
-        return null;
+        PreventivoRequest preventivoRequest = util.calcolaPrezzoFinale(request);
+        request.setListaEta(preventivoRequest.getListaEta());
+        request.setPrezzarioCamera(preventivoRequest.getPrezzarioCamera());
+        return prenotazioneMapper.fromPrenotazioneRequestToPrenotazioneResponse(request);
     }
 
     public PreventivoResponse richiediPreventivo(PreventivoRequest request) {
