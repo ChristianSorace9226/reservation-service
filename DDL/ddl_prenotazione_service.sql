@@ -23,9 +23,10 @@ CREATE TABLE IF NOT EXISTS prenotazione_service.prenotazione (
     id_tipo_camera INTEGER NOT NULL, -- ID del tipo di camera
     check_in TIMESTAMP NOT NULL, -- Data di check-in
     check_out TIMESTAMP NOT NULL, -- Data di check-out
-    lista_id_fascia_eta INTEGER ARRAY NOT NULL, -- Array di ID fascia età
+    lista_eta INTEGER ARRAY NOT NULL, -- Array di età
     id_metodo_pagamento INTEGER NOT NULL, -- ID del metodo di pagamento
     prezzo_totale DECIMAL(10,2) NOT NULL, -- ID del prezzo della camera
+    prezzi_a_persona DECIMAL(10,2) ARRAY NOT NULL, -- Prezzi per ogni età
     codice_prenotazione VARCHAR(100) NOT NULL, -- Codice della prenotazione
     group_id VARCHAR(50) NOT NULL, -- Group ID per la prenotazione
     CONSTRAINT uq_num_camera UNIQUE (numero_camera),

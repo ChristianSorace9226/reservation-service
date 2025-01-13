@@ -5,9 +5,12 @@ import it.nesea.albergo.common_lib.exception.NotFoundException;
 import it.nesea.prenotazione_service.controller.feign.HotelExternalController;
 import it.nesea.prenotazione_service.controller.feign.UserExternalController;
 import it.nesea.prenotazione_service.dto.request.PrenotazioneRequest;
+import it.nesea.prenotazione_service.dto.request.PrenotazioneRequestSecondo;
 import it.nesea.prenotazione_service.dto.request.PreventivoRequest;
 import it.nesea.prenotazione_service.dto.response.PrenotazioneResponse;
+import it.nesea.prenotazione_service.dto.response.PrenotazioneResponseSecondo;
 import it.nesea.prenotazione_service.dto.response.PreventivoResponse;
+import it.nesea.prenotazione_service.mapper.PrenotazioneMapper;
 import it.nesea.prenotazione_service.mapper.PreventivoMapper;
 import it.nesea.prenotazione_service.model.Prenotazione;
 import it.nesea.prenotazione_service.model.Preventivo;
@@ -41,6 +44,7 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
     private final HotelExternalController hotelExternalController;
     private final EntityManager entityManager;
     private final PreventivoMapper preventivoMapper;
+    private final PrenotazioneMapper prenotazioneMapper;
     private final UserExternalController userExternalController;
 
     @Override
@@ -82,33 +86,27 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
                 .build();
     }
 
+
+    public PrenotazioneResponseSecondo prenotazione(PrenotazioneRequestSecondo request){
+        log.debug("Oggetto request in input: [{}]", request);
+
+        if (!userExternalController.checkUtente(request.getIdUtente()).getBody().getResponse()) {
+            log.error("Utente {} non valido", request.getIdUtente());
+            throw new NotFoundException("Utente non valido");
+        }
+        request = prenotazioneMapper.fromPreventivoRequestToPrenotazioneRequest(util.calcolaPrezzoFinale(request));
+
+        Optional<Prenotazione> prenotazioneEsistente = prenotazioneRepository.findByGroupId(request.getGroupId());
+        if (prenotazioneEsistente.isPresent()) {
+
+        }
+
+        return null;
+    }
+
     public PreventivoResponse richiediPreventivo(PreventivoRequest request) {
 
-        LocalDate checkIn = request.getCheckIn();
-        LocalDate checkOut = request.getCheckOut();
-
-        util.isDateValid(checkIn, checkOut);
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaQuery<StagioneEntity> percentualeMaggiorazioneQuery = cb.createQuery(StagioneEntity.class);
-        Root<StagioneEntity> stagioneRoot = percentualeMaggiorazioneQuery.from(StagioneEntity.class);
-        percentualeMaggiorazioneQuery.select(stagioneRoot);
-
-        List<StagioneEntity> stagioni = entityManager.createQuery(percentualeMaggiorazioneQuery).getResultList();
-
-        int percentualeMaggiorazione = util.getPercentualeMaggiorazione(checkIn, checkOut, stagioni);
-
-        List<BigDecimal> prezziAPersona = request.getPrezzarioCamera().getPrezziAPersona();
-        prezziAPersona.replaceAll(aPersona -> aPersona.multiply(BigDecimal.valueOf(1 + (percentualeMaggiorazione / 100.0))));
-
-        request.getPrezzarioCamera().setPrezziAPersona(prezziAPersona);
-
-        BigDecimal prezzoNuoviOccupanti = request.getPrezzarioCamera().getPrezzoTotale()
-                .multiply(BigDecimal.valueOf(util.calcolaNumeroGiorni(checkIn, checkOut)));
-
-        BigDecimal prezzoNuoviOccupantiConMaggiorazione = prezzoNuoviOccupanti
-                .multiply(BigDecimal.valueOf(1 + (percentualeMaggiorazione / 100.0)));  // Divisione con 100.0 per ottenere la parte decimale corretta
-
-        request.getPrezzarioCamera().setPrezzoTotale(prezzoNuoviOccupantiConMaggiorazione);
+        request = util.calcolaPrezzoFinale(request);
 
         return preventivoMapper.fromPrezzoCameraDTOToPreventivoResponse(request.getPrezzarioCamera());
     }

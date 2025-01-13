@@ -2,14 +2,17 @@ package it.nesea.prenotazione_service.util;
 
 import it.nesea.albergo.common_lib.exception.BadRequestException;
 import it.nesea.albergo.common_lib.exception.NotFoundException;
+import it.nesea.prenotazione_service.dto.request.PreventivoRequest;
 import it.nesea.prenotazione_service.model.Preventivo;
 import it.nesea.prenotazione_service.model.StagioneEntity;
 import it.nesea.prenotazione_service.model.repository.PreventivoRepository;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -20,9 +23,11 @@ import java.util.UUID;
 public class Util {
 
     private final PreventivoRepository preventivoRepository;
+    private final EntityManager entityManager;
 
-    public Util(PreventivoRepository preventivoRepository) {
+    public Util(PreventivoRepository preventivoRepository, EntityManager entityManager) {
         this.preventivoRepository = preventivoRepository;
+        this.entityManager = entityManager;
     }
 
     public String generaCodicePrenotazione() {
@@ -47,11 +52,11 @@ public class Util {
         preventivoRepository.save(preventivoEsistente);
     }
 
-    public long calcolaNumeroGiorni(LocalDate checkIn, LocalDate checkOut) {
-        if (checkIn == null || checkOut == null) {
+    public long calcolaNumeroGiorni(LocalDate dataInizio, LocalDate dataFine) {
+        if (dataInizio == null || dataFine == null) {
             throw new IllegalArgumentException("Le date di checkIn e checkOut non possono essere null");
         }
-        return ChronoUnit.DAYS.between(checkIn, checkOut);
+        return ChronoUnit.DAYS.between(dataInizio, dataFine);
     }
 
     public Integer getPercentualeMaggiorazione(LocalDate checkIn, LocalDate checkOut, List<StagioneEntity> stagioni) {
@@ -97,4 +102,32 @@ public class Util {
     }
 
 
+    public PreventivoRequest calcolaPrezzoFinale(PreventivoRequest request) {
+        LocalDate checkIn = request.getCheckIn();
+        LocalDate checkOut = request.getCheckOut();
+
+        isDateValid(checkIn, checkOut);
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<StagioneEntity> percentualeMaggiorazioneQuery = cb.createQuery(StagioneEntity.class);
+        Root<StagioneEntity> stagioneRoot = percentualeMaggiorazioneQuery.from(StagioneEntity.class);
+        percentualeMaggiorazioneQuery.select(stagioneRoot);
+
+        List<StagioneEntity> stagioni = entityManager.createQuery(percentualeMaggiorazioneQuery).getResultList();
+
+        int percentualeMaggiorazione = getPercentualeMaggiorazione(checkIn, checkOut, stagioni);
+
+        List<BigDecimal> prezziAPersona = request.getPrezzarioCamera().getPrezziAPersona();
+        prezziAPersona.replaceAll(aPersona -> aPersona.multiply(BigDecimal.valueOf(1 + (percentualeMaggiorazione / 100.0))));
+
+        request.getPrezzarioCamera().setPrezziAPersona(prezziAPersona);
+
+        BigDecimal prezzoNuoviOccupanti = request.getPrezzarioCamera().getPrezzoTotale()
+                .multiply(BigDecimal.valueOf(calcolaNumeroGiorni(checkIn, checkOut)));
+
+        BigDecimal prezzoNuoviOccupantiConMaggiorazione = prezzoNuoviOccupanti
+                .multiply(BigDecimal.valueOf(1 + (percentualeMaggiorazione / 100.0)));
+
+        request.getPrezzarioCamera().setPrezzoTotale(prezzoNuoviOccupantiConMaggiorazione);
+        return request;
+    }
 }
