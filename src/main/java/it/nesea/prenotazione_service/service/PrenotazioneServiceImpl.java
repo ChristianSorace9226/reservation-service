@@ -113,7 +113,6 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
             request.setListaEta(etaEsistenti);
         }
         PreventivoRequest preventivoRequest = util.calcolaPrezzoFinale(request);
-        request.setListaEta(preventivoRequest.getListaEta());
         request.setPrezzarioCamera(preventivoRequest.getPrezzarioCamera());
         return prenotazioneMapper.fromPrenotazioneRequestToPrenotazioneResponse(request);
     }
