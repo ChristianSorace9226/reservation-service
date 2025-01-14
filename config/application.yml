@@ -27,6 +27,7 @@ external-call:
     util:
       url: http://localhost:8080/api/util
       getPrezzoCamera: /get-prezzi-camere
+      checkDisponibilita: /check-disponibilita
 
   user:
     util:
