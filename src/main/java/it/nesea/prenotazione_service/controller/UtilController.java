@@ -2,7 +2,6 @@ package it.nesea.prenotazione_service.controller;
 
 import it.nesea.albergo.common_lib.dto.response.CustomResponse;
 import it.nesea.prenotazione_service.service.ExternalUtilService;
-import it.nesea.prenotazione_service.service.ExternalUtilServiceImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,7 +19,7 @@ public class UtilController {
     }
 
     @GetMapping("/get-camere-prenotate-oggi")
-    public ResponseEntity<CustomResponse<List<String>>> getCamerePrenotateOggi(){
+    public ResponseEntity<CustomResponse<List<String>>> getCamerePrenotateOggi() {
         return ResponseEntity.ok(CustomResponse.success(externalUtilService.getCamerePrenotateOggi()));
     }
 

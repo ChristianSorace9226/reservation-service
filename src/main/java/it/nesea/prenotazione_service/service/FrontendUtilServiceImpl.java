@@ -1,53 +1,32 @@
 package it.nesea.prenotazione_service.service;
 
 import it.nesea.albergo.common_lib.exception.NotFoundException;
-import it.nesea.prenotazione_service.dto.response.PreventivoResponse;
-import it.nesea.prenotazione_service.mapper.PreventivoMapper;
 import it.nesea.prenotazione_service.model.MaggiorazioneEntity;
-import it.nesea.prenotazione_service.model.Prenotazione;
-import it.nesea.prenotazione_service.model.Preventivo;
+import it.nesea.prenotazione_service.model.PrenotazioneSave;
 import it.nesea.prenotazione_service.model.StagioneEntity;
-import it.nesea.prenotazione_service.model.repository.PrenotazioneRepository;
-import it.nesea.prenotazione_service.model.repository.PreventivoRepository;
+import it.nesea.prenotazione_service.model.repository.PrenotazioneSaveRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class FrontendUtilServiceImpl implements FrontendUtilService {
 
-    private final PreventivoRepository preventivoRepository;
-    private final PrenotazioneRepository prenotazioneRepository;
+    private final PrenotazioneSaveRepository prenotazioneRepository;
     private final EntityManager entityManager;
-    private final PreventivoMapper preventivoMapper;
 
-    public FrontendUtilServiceImpl(PreventivoRepository preventivoRepository, PrenotazioneRepository prenotazioneRepository, EntityManager entityManager, PreventivoMapper preventivoMapper) {
-        this.preventivoRepository = preventivoRepository;
+    public FrontendUtilServiceImpl(PrenotazioneSaveRepository prenotazioneRepository, EntityManager entityManager) {
         this.prenotazioneRepository = prenotazioneRepository;
         this.entityManager = entityManager;
-        this.preventivoMapper = preventivoMapper;
-    }
-
-    public List<PreventivoResponse> getAllPreventivi() {
-        List<Preventivo> preventivi = preventivoRepository.findAll();
-        if (preventivi.isEmpty()) {
-            throw new NotFoundException("Nessun preventivo trovato");
-        }
-        List<PreventivoResponse> preventiviResponse = new ArrayList<>();
-        for (Preventivo preventivo : preventivi) {
-            preventiviResponse.add(preventivoMapper.fromPreventivoToPreventivoResponse(preventivo));
-        }
-        return preventiviResponse;
     }
 
     @Override
-    public List<Prenotazione> getAllPrenotazioni() {
-        List<Prenotazione> prenotazioni = prenotazioneRepository.findAll();
+    public List<PrenotazioneSave> getAllPrenotazioni() {
+        List<PrenotazioneSave> prenotazioni = prenotazioneRepository.findAll();
         if (prenotazioni.isEmpty()) {
             throw new NotFoundException("Nessun preventivo trovato");
         }

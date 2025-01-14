@@ -3,33 +3,33 @@ package it.nesea.prenotazione_service.dto.request;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.Size;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.io.Serial;
 import java.io.Serializable;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class PrenotazioneRequest implements Serializable {
+public class PrenotazioneRequest extends PreventivoRequest implements Serializable {
 
     @Serial
-    private static final long serialVersionUID = -1190685920919258409L;
+    private static final long serialVersionUID = 5454354981169351608L;
 
     @NotNull(message = "devi specificare l'id utente per la prenotazione")
     Integer idUtente;
-
-    @NotNull(message = "inserisci l'id del tuo preventivo")
-    Integer idPreventivo;
 
     @Min(value = 1)
     @Max(value = 2)
     @NotNull(message = "scegli il metodo di pagamento tra 1 e 2")
     Integer idMetodoPagamento;
 
+    @Size(min = 4, max = 4, message = "groupId non valido")
+    String groupId;
 }
+
