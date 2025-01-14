@@ -62,5 +62,4 @@ public class PrenotazioneSave implements Serializable {
 
     @Column(name = "CODICE_PRENOTAZIONE", nullable = false)
     String codicePrenotazione;
-
 }

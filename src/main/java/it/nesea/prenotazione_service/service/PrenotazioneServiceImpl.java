@@ -16,6 +16,7 @@ import it.nesea.prenotazione_service.model.Prenotazione;
 import it.nesea.prenotazione_service.model.PrenotazioneSave;
 import it.nesea.prenotazione_service.model.Preventivo;
 import it.nesea.prenotazione_service.model.repository.PrenotazioneRepository;
+import it.nesea.prenotazione_service.model.repository.PrenotazioneSaveRepository;
 import it.nesea.prenotazione_service.model.repository.PreventivoRepository;
 import it.nesea.prenotazione_service.util.Util;
 import jakarta.persistence.EntityManager;
@@ -42,6 +43,7 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
     private final PreventivoMapper preventivoMapper;
     private final PrenotazioneMapper prenotazioneMapper;
     private final UserExternalController userExternalController;
+    private final PrenotazioneSaveRepository prenotazioneSaveRepository;
 
     @Override
     public PrenotazioneResponse prenota(PrenotazioneRequest request) {
@@ -83,6 +85,7 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
     }
 
 
+    @Override
     public PrenotazioneResponseSecondo prenotazione(PrenotazioneRequestSecondo request) {
         log.debug("Oggetto request in input: [{}]", request);
 
@@ -94,7 +97,7 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
         }
 
         if (request.getGroupId() != null) {
-            Optional<PrenotazioneSave> prenotazioneOptional = prenotazioneRepository.findByGroupId(request.getGroupId());
+            Optional<PrenotazioneSave> prenotazioneOptional = prenotazioneSaveRepository.findByGroupId(request.getGroupId());
             if (prenotazioneOptional.isEmpty()) {
                 log.error("Prenotazione con groupId {} non trovata", request.getGroupId());
                 throw new NotFoundException("Prenotazione con groupId non trovata");
@@ -112,8 +115,10 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
             etaEsistenti.addAll(request.getListaEta());
             request.setListaEta(etaEsistenti);
         }
+
         PreventivoRequest preventivoRequest = util.calcolaPrezzoFinale(request);
         request.setPrezzarioCamera(preventivoRequest.getPrezzarioCamera());
+        prenotazioneSaveRepository.save(prenotazioneMapper.fromPrenotazioneRequestToPrenotazione(request));
         return prenotazioneMapper.fromPrenotazioneRequestToPrenotazioneResponse(request);
     }
 

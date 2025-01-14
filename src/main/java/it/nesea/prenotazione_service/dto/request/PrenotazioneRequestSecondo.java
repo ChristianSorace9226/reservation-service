@@ -3,6 +3,7 @@ package it.nesea.prenotazione_service.dto.request;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -28,6 +29,7 @@ public class PrenotazioneRequestSecondo extends PreventivoRequest implements Ser
     @NotNull(message = "scegli il metodo di pagamento tra 1 e 2")
     Integer idMetodoPagamento;
 
+    @Size(min = 4, max = 4, message = "groupId non valido")
     String groupId;
 }
 
