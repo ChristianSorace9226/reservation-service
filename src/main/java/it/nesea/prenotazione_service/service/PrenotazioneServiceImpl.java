@@ -1,5 +1,6 @@
 package it.nesea.prenotazione_service.service;
 
+import it.nesea.albergo.common_lib.dto.request.CheckDateStart;
 import it.nesea.albergo.common_lib.exception.BadRequestException;
 import it.nesea.albergo.common_lib.exception.NotFoundException;
 import it.nesea.prenotazione_service.controller.feign.HotelExternalController;
@@ -96,6 +97,14 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
 
         util.isDateValid(request.getCheckIn(), request.getCheckOut());
 
+        CheckDateStart checkDateStart = new CheckDateStart(request.getPrezzarioCamera().getNumeroCamera(),
+                request.getCheckIn().atStartOfDay());
+
+
+        if(!hotelExternalController.checkDisponibilita(checkDateStart).getBody().getResponse()) {
+            log.error("Camera non ancora disponibile");
+            throw new BadRequestException("Camera non ancora disponibile");
+        }
 
         if (!userExternalController.checkUtente(request.getIdUtente()).getBody().getResponse()) {
             log.error("Utente {} non valido", request.getIdUtente());
