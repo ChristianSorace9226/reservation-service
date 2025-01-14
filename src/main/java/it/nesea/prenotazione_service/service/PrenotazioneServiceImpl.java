@@ -21,9 +21,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.chrono.ChronoLocalDate;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Data
@@ -40,7 +41,7 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
     private final PrenotazioneSaveRepository prenotazioneSaveRepository;
 
 
-    //todo: controllo su 1) numero camera con stesso groupId
+    //todo: controllo su numero camera con stesso groupId
 
     @Transactional
     @Override
@@ -49,10 +50,7 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
 
         util.isDateValid(request.getCheckIn(), request.getCheckOut());
 
-        CheckDateStart checkDateStart = new CheckDateStart(request.getPrezzarioCamera().getNumeroCamera(),
-                request.getCheckIn().atStartOfDay());
-
-
+        CheckDateStart checkDateStart = new CheckDateStart(request.getPrezzarioCamera().getNumeroCamera(), request.getCheckIn().atStartOfDay());
         if (!hotelExternalController.checkDisponibilita(checkDateStart).getBody().getResponse()) {
             log.error("Camera non ancora disponibile");
             throw new BadRequestException("Camera non ancora disponibile");
@@ -66,29 +64,57 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
         PrenotazioneSave prenotazioneSave = new PrenotazioneSave();
 
         if (request.getGroupId() != null) {
-            Optional<PrenotazioneSave> prenotazioneOptional = prenotazioneSaveRepository.findByGroupId(request.getGroupId());
-            if (prenotazioneOptional.isEmpty()) {
-                log.error("Prenotazione con groupId {} non trovata", request.getGroupId());
-                throw new NotFoundException("Prenotazione con groupId non trovata");
+            List<PrenotazioneSave> prenotazioniEsistenti = prenotazioneSaveRepository.findByGroupId(request.getGroupId());
+            if (prenotazioniEsistenti.isEmpty()) {
+                log.error("Prenotazioni con groupId {} non trovate", request.getGroupId());
+                throw new NotFoundException("Prenotazioni con groupId non trovate");
             }
-            PrenotazioneSave prenotazioneEsistente = prenotazioneOptional.get();
 
-            if ((prenotazioneEsistente.getIdTipoCamera() - request.getListaEta().size() < 0)) {
+            if (request.getCheckOut().isAfter(ChronoLocalDate.from(prenotazioniEsistenti.getFirst().getCheckOut()))) {
+                log.error("La data di check out non può essere posteriore a quella della prenotazione esistente");
+                throw new BadRequestException("La data di check out non può essere posteriore a quella della prenotazione esistente");
+            }
+
+            int capienzaCamera = prenotazioniEsistenti.getFirst().getIdTipoCamera();
+
+            int personePrenotate = 0;
+            for (PrenotazioneSave prenotazioneEsistente : prenotazioniEsistenti) {
+                personePrenotate += prenotazioneEsistente.getListaEta().size();
+            }
+
+            if (personePrenotate + request.getListaEta().size() > capienzaCamera) {
                 log.error("Il numero di persone da unire al gruppo eccede la capienza della camera");
                 throw new BadRequestException("Il numero di persone da unire al gruppo eccede la capienza della camera");
             }
-            if (request.getCheckOut().isAfter(ChronoLocalDate.from(prenotazioneEsistente.getCheckOut()))) {
-                log.error("La data di check-out non può essere successiva a quella della prenotazione esistente");
-                throw new BadRequestException("La data di check-out non può essere successiva a quella della prenotazione esistente");
+
+            List<Integer> etaEsistenti = new ArrayList<>();
+            for (PrenotazioneSave prenotazioneEsistente : prenotazioniEsistenti) {
+                etaEsistenti.addAll(prenotazioneEsistente.getListaEta());
             }
-            List<Integer> etaEsistenti = prenotazioneEsistente.getListaEta();
-            etaEsistenti.addAll(request.getListaEta());
+            List<Integer> listaEta = request.getListaEta();
+            etaEsistenti.addAll(listaEta);
             request.setListaEta(etaEsistenti);
 
             PreventivoRequest preventivoRequest = util.calcolaPrezzoFinale(request);
             request.setPrezzarioCamera(preventivoRequest.getPrezzarioCamera());
+
+
+            List<BigDecimal> listaPrezzi = new ArrayList<>();
+            BigDecimal prezzoParziale = BigDecimal.ZERO;
+            for (int i = listaEta.size() - 1; i >= 0; i--) {
+                listaPrezzi.add(request.getPrezzarioCamera().getPrezziAPersona().get(i));
+                prezzoParziale = prezzoParziale.add(request.getPrezzarioCamera().getPrezziAPersona().get(i));
+            }
+            BigDecimal giorniPermanenza = BigDecimal.valueOf(util.calcolaNumeroGiorni(request.getCheckIn(), request.getCheckOut()));
             prenotazioneSave = prenotazioneMapper.fromPrenotazioneRequestToPrenotazione(request);
+            prenotazioneSave.setPrezziAPersona(listaPrezzi);
+            prenotazioneSave.setPrezzoTotale(prezzoParziale.multiply(giorniPermanenza));
+
+
+            prenotazioneSave.setListaEta(listaEta);
             prenotazioneSave.setCodicePrenotazione(util.generaCodicePrenotazione());
+
+            prenotazioneSave.setGroupId(request.getGroupId());
 
             prenotazioneSaveRepository.save(prenotazioneSave);
             return prenotazioneMapper.fromPrenotazioneRequestToPrenotazioneResponse(prenotazioneSave);
@@ -103,6 +129,7 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
         prenotazioneSaveRepository.save(prenotazioneSave);
         return prenotazioneMapper.fromPrenotazioneRequestToPrenotazioneResponse(prenotazioneSave);
     }
+
 
     public PreventivoResponse richiediPreventivo(PreventivoRequest request) {
 

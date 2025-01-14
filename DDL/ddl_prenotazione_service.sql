@@ -29,9 +29,7 @@ CREATE TABLE IF NOT EXISTS prenotazione_service.prenotazione (
     prezzi_a_persona DECIMAL(10,2) ARRAY NOT NULL, -- Prezzi per ogni età
     codice_prenotazione VARCHAR(100) NOT NULL, -- Codice della prenotazione
     group_id VARCHAR(50) NOT NULL, -- Group ID per la prenotazione
-    CONSTRAINT uq_num_camera UNIQUE (numero_camera),
-    CONSTRAINT uq_cod_prenotazione UNIQUE (codice_prenotazione),
-    CONSTRAINT uq_group_id UNIQUE (group_id)
+    CONSTRAINT uq_cod_prenotazione UNIQUE (codice_prenotazione)
 );
 
 -- Creazione della tabella MAGGIORAZIONE
