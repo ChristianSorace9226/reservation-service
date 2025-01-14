@@ -18,6 +18,6 @@ public interface HotelExternalController {
     ResponseEntity<CustomResponse<List<PrezzoCameraDTO>>> getListaPrezzoCamera(@RequestBody List<Integer> listaEta);
 
     @PostMapping("${external-call.hotel.util.checkDisponibilita}")
-    ResponseEntity<CustomResponse<List<Boolean>>> checkDisponibilita(@RequestBody CheckDateStart checkDateStart);
+    ResponseEntity<CustomResponse<Boolean>> checkDisponibilita(@RequestBody CheckDateStart checkDateStart);
 
 }
