@@ -24,6 +24,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.chrono.ChronoLocalDate;
 import java.util.List;
@@ -47,54 +48,61 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
 
     @Override
     public PrenotazioneResponse prenota(PrenotazioneRequest request) {
-        log.debug("Oggetto request in input: [{}]", request);
-
-        if (!userExternalController.checkUtente(request.getIdUtente()).getBody().getResponse()) {
-            log.error("Utente {} non valido", request.getIdUtente());
-            throw new NotFoundException("Utente non valido");
-        }
-
-        Optional<Preventivo> ricercaPreventivo = preventivoRepository.findById(request.getIdPreventivo());
-        if (ricercaPreventivo.isEmpty()) {
-            log.error("Preventivo {} non trovato", request.getIdPreventivo());
-            throw new NotFoundException("Preventivo non trovato");
-        }
-        Preventivo preventivoEsistente = ricercaPreventivo.get();
-
-        if (preventivoEsistente.getPrenotato()) {
-            log.error("Preventivo {} già prenotato", request.getIdPreventivo());
-            throw new BadRequestException("Il preventivo che stai cercando di prenotare è già stato prenotato");
-        }
-
-        //Creo una nuova prenotazione
-        Prenotazione nuovaPrenotazione = new Prenotazione();
-        nuovaPrenotazione.setIdMetodoPagamento(request.getIdMetodoPagamento());
-        nuovaPrenotazione.setCodicePrenotazione(util.generaCodicePrenotazione());
-        nuovaPrenotazione.setPreventivo(preventivoEsistente);
-        nuovaPrenotazione.setIdUtente(request.getIdUtente());
-
-//        prenotazioneRepository.save(nuovaPrenotazione);
-        util.prenotaPreventivo(preventivoEsistente);
-        log.info("Preventivo [{}] prenotato con successo", preventivoEsistente);
-
-        return new PrenotazioneResponse.PrenotazioneResponseBuilder()
-                .codicePrenotazione(nuovaPrenotazione.getCodicePrenotazione())
-                .groupId(preventivoEsistente.getGroupId())
-                .prezzoCamera(preventivoEsistente.getPrezzoTotale())
-                .build();
+        return null;
+//        log.debug("Oggetto request in input: [{}]", request);
+//
+//        if (!userExternalController.checkUtente(request.getIdUtente()).getBody().getResponse()) {
+//            log.error("Utente {} non valido", request.getIdUtente());
+//            throw new NotFoundException("Utente non valido");
+//        }
+//
+//        Optional<Preventivo> ricercaPreventivo = preventivoRepository.findById(request.getIdPreventivo());
+//        if (ricercaPreventivo.isEmpty()) {
+//            log.error("Preventivo {} non trovato", request.getIdPreventivo());
+//            throw new NotFoundException("Preventivo non trovato");
+//        }
+//        Preventivo preventivoEsistente = ricercaPreventivo.get();
+//
+//        if (preventivoEsistente.getPrenotato()) {
+//            log.error("Preventivo {} già prenotato", request.getIdPreventivo());
+//            throw new BadRequestException("Il preventivo che stai cercando di prenotare è già stato prenotato");
+//        }
+//
+//        //Creo una nuova prenotazione
+//        Prenotazione nuovaPrenotazione = new Prenotazione();
+//        nuovaPrenotazione.setIdMetodoPagamento(request.getIdMetodoPagamento());
+//        nuovaPrenotazione.setCodicePrenotazione(util.generaCodicePrenotazione());
+//        nuovaPrenotazione.setPreventivo(preventivoEsistente);
+//        nuovaPrenotazione.setIdUtente(request.getIdUtente());
+//
+////        prenotazioneRepository.save(nuovaPrenotazione);
+//        util.prenotaPreventivo(preventivoEsistente);
+//        log.info("Preventivo [{}] prenotato con successo", preventivoEsistente);
+//
+//        return new PrenotazioneResponse.PrenotazioneResponseBuilder()
+//                .codicePrenotazione(nuovaPrenotazione.getCodicePrenotazione())
+//                .groupId(preventivoEsistente.getGroupId())
+//                .prezzoCamera(preventivoEsistente.getPrezzoTotale())
+//                .build();
     }
 
 
+    //todo: controllo su 1) numero camera con stesso groupId 2)su data inizio disponibilita
+
+    @Transactional
     @Override
     public PrenotazioneResponseSecondo prenotazione(PrenotazioneRequestSecondo request) {
         log.debug("Oggetto request in input: [{}]", request);
 
         util.isDateValid(request.getCheckIn(), request.getCheckOut());
 
+
         if (!userExternalController.checkUtente(request.getIdUtente()).getBody().getResponse()) {
             log.error("Utente {} non valido", request.getIdUtente());
             throw new NotFoundException("Utente non valido");
         }
+
+        PrenotazioneSave prenotazioneSave = new PrenotazioneSave();
 
         if (request.getGroupId() != null) {
             Optional<PrenotazioneSave> prenotazioneOptional = prenotazioneSaveRepository.findByGroupId(request.getGroupId());
@@ -103,6 +111,7 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
                 throw new NotFoundException("Prenotazione con groupId non trovata");
             }
             PrenotazioneSave prenotazioneEsistente = prenotazioneOptional.get();
+
             if ((prenotazioneEsistente.getIdTipoCamera() - request.getListaEta().size() < 0)) {
                 log.error("Il numero di persone da unire al gruppo eccede la capienza della camera");
                 throw new BadRequestException("Il numero di persone da unire al gruppo eccede la capienza della camera");
@@ -114,12 +123,24 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
             List<Integer> etaEsistenti = prenotazioneEsistente.getListaEta();
             etaEsistenti.addAll(request.getListaEta());
             request.setListaEta(etaEsistenti);
+
+            PreventivoRequest preventivoRequest = util.calcolaPrezzoFinale(request);
+            request.setPrezzarioCamera(preventivoRequest.getPrezzarioCamera());
+            prenotazioneSave = prenotazioneMapper.fromPrenotazioneRequestToPrenotazione(request);
+            prenotazioneSave.setCodicePrenotazione(util.generaCodicePrenotazione());
+
+            prenotazioneSaveRepository.save(prenotazioneSave);
+            return prenotazioneMapper.fromPrenotazioneRequestToPrenotazioneResponse(prenotazioneSave);
         }
 
         PreventivoRequest preventivoRequest = util.calcolaPrezzoFinale(request);
         request.setPrezzarioCamera(preventivoRequest.getPrezzarioCamera());
-        prenotazioneSaveRepository.save(prenotazioneMapper.fromPrenotazioneRequestToPrenotazione(request));
-        return prenotazioneMapper.fromPrenotazioneRequestToPrenotazioneResponse(request);
+        prenotazioneSave = prenotazioneMapper.fromPrenotazioneRequestToPrenotazione(request);
+        prenotazioneSave.setCodicePrenotazione(util.generaCodicePrenotazione());
+        prenotazioneSave.setGroupId(util.generaGroupId());
+
+        prenotazioneSaveRepository.save(prenotazioneSave);
+        return prenotazioneMapper.fromPrenotazioneRequestToPrenotazioneResponse(prenotazioneSave);
     }
 
     public PreventivoResponse richiediPreventivo(PreventivoRequest request) {
