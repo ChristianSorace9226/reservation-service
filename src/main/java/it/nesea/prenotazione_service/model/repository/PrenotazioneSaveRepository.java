@@ -10,4 +10,3 @@ import java.util.Optional;
 public interface PrenotazioneSaveRepository extends JpaRepository<PrenotazioneSave, Integer> {
     Optional<PrenotazioneSave> findByGroupId(String groupId);
 }
-

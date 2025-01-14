@@ -1,8 +1,6 @@
 package it.nesea.prenotazione_service.service;
 
-import it.nesea.prenotazione_service.model.Prenotazione;
 import it.nesea.prenotazione_service.model.Preventivo;
-import it.nesea.prenotazione_service.model.repository.PrenotazioneRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
