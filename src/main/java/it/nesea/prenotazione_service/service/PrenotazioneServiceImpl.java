@@ -5,14 +5,15 @@ import it.nesea.albergo.common_lib.exception.BadRequestException;
 import it.nesea.albergo.common_lib.exception.NotFoundException;
 import it.nesea.prenotazione_service.controller.feign.HotelExternalController;
 import it.nesea.prenotazione_service.controller.feign.UserExternalController;
+import it.nesea.prenotazione_service.dto.request.ModificaPrenotazioneRequest;
 import it.nesea.prenotazione_service.dto.request.PrenotazioneRequest;
 import it.nesea.prenotazione_service.dto.request.PreventivoRequest;
 import it.nesea.prenotazione_service.dto.response.PrenotazioneResponse;
 import it.nesea.prenotazione_service.dto.response.PreventivoResponse;
 import it.nesea.prenotazione_service.mapper.PrenotazioneMapper;
 import it.nesea.prenotazione_service.mapper.PreventivoMapper;
-import it.nesea.prenotazione_service.model.PrenotazioneSave;
-import it.nesea.prenotazione_service.model.repository.PrenotazioneSaveRepository;
+import it.nesea.prenotazione_service.model.Prenotazione;
+import it.nesea.prenotazione_service.model.repository.PrenotazioneRepository;
 import it.nesea.prenotazione_service.util.Util;
 import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
@@ -38,7 +39,7 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
     private final PreventivoMapper preventivoMapper;
     private final PrenotazioneMapper prenotazioneMapper;
     private final UserExternalController userExternalController;
-    private final PrenotazioneSaveRepository prenotazioneSaveRepository;
+    private final PrenotazioneRepository prenotazioneRepository;
 
 
     //todo: controllo su numero camera con stesso groupId
@@ -61,10 +62,10 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
             throw new NotFoundException("Utente non valido");
         }
 
-        PrenotazioneSave prenotazioneSave = new PrenotazioneSave();
+        Prenotazione prenotazione = new Prenotazione();
 
         if (request.getGroupId() != null) {
-            List<PrenotazioneSave> prenotazioniEsistenti = prenotazioneSaveRepository.findByGroupId(request.getGroupId());
+            List<Prenotazione> prenotazioniEsistenti = prenotazioneRepository.findByGroupId(request.getGroupId());
             if (prenotazioniEsistenti.isEmpty()) {
                 log.error("Prenotazioni con groupId {} non trovate", request.getGroupId());
                 throw new NotFoundException("Prenotazioni con groupId non trovate");
@@ -78,7 +79,7 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
             int capienzaCamera = prenotazioniEsistenti.getFirst().getIdTipoCamera();
 
             int personePrenotate = 0;
-            for (PrenotazioneSave prenotazioneEsistente : prenotazioniEsistenti) {
+            for (Prenotazione prenotazioneEsistente : prenotazioniEsistenti) {
                 personePrenotate += prenotazioneEsistente.getListaEta().size();
             }
 
@@ -88,7 +89,7 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
             }
 
             List<Integer> etaEsistenti = new ArrayList<>();
-            for (PrenotazioneSave prenotazioneEsistente : prenotazioniEsistenti) {
+            for (Prenotazione prenotazioneEsistente : prenotazioniEsistenti) {
                 etaEsistenti.addAll(prenotazioneEsistente.getListaEta());
             }
             List<Integer> listaEta = request.getListaEta();
@@ -105,36 +106,80 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
                 listaPrezzi.add(request.getPrezzarioCamera().getPrezziAPersona().get(i));
                 prezzoParziale = prezzoParziale.add(request.getPrezzarioCamera().getPrezziAPersona().get(i));
             }
+
             BigDecimal giorniPermanenza = BigDecimal.valueOf(util.calcolaNumeroGiorni(request.getCheckIn(), request.getCheckOut()));
-            prenotazioneSave = prenotazioneMapper.fromPrenotazioneRequestToPrenotazione(request);
-            prenotazioneSave.setPrezziAPersona(listaPrezzi);
-            prenotazioneSave.setPrezzoTotale(prezzoParziale.multiply(giorniPermanenza));
+            prenotazione = prenotazioneMapper.fromPrenotazioneRequestToPrenotazione(request);
+            prenotazione.setPrezziAPersona(listaPrezzi);
+            prenotazione.setPrezzoTotale(prezzoParziale.multiply(giorniPermanenza));
 
 
-            prenotazioneSave.setListaEta(listaEta);
-            prenotazioneSave.setCodicePrenotazione(util.generaCodicePrenotazione());
+            prenotazione.setListaEta(listaEta);
+            prenotazione.setCodicePrenotazione(util.generaCodicePrenotazione());
 
-            prenotazioneSave.setGroupId(request.getGroupId());
+            prenotazione.setGroupId(request.getGroupId());
 
-            prenotazioneSaveRepository.save(prenotazioneSave);
-            return prenotazioneMapper.fromPrenotazioneRequestToPrenotazioneResponse(prenotazioneSave);
+            prenotazioneRepository.save(prenotazione);
+            return prenotazioneMapper.fromPrenotazioneToPrenotazioneResponse(prenotazione);
         }
 
         PreventivoRequest preventivoRequest = util.calcolaPrezzoFinale(request);
         request.setPrezzarioCamera(preventivoRequest.getPrezzarioCamera());
-        prenotazioneSave = prenotazioneMapper.fromPrenotazioneRequestToPrenotazione(request);
-        prenotazioneSave.setCodicePrenotazione(util.generaCodicePrenotazione());
-        prenotazioneSave.setGroupId(util.generaGroupId());
+        prenotazione = prenotazioneMapper.fromPrenotazioneRequestToPrenotazione(request);
+        prenotazione.setCodicePrenotazione(util.generaCodicePrenotazione());
+        prenotazione.setGroupId(util.generaGroupId());
 
-        prenotazioneSaveRepository.save(prenotazioneSave);
-        return prenotazioneMapper.fromPrenotazioneRequestToPrenotazioneResponse(prenotazioneSave);
+        prenotazioneRepository.save(prenotazione);
+        return prenotazioneMapper.fromPrenotazioneToPrenotazioneResponse(prenotazione);
     }
 
-
     public PreventivoResponse richiediPreventivo(PreventivoRequest request) {
-
         request = util.calcolaPrezzoFinale(request);
-
         return preventivoMapper.fromPrezzoCameraDTOToPreventivoResponse(request.getPrezzarioCamera());
+    }
+
+    @Transactional
+    @Override
+    public PrenotazioneResponse modificaPrenotazione(ModificaPrenotazioneRequest request) {
+        log.info("Oggetto request in input per la modifica: [{}]", request);
+
+        Prenotazione prenotazione = prenotazioneRepository.findById(request.getId())
+                .orElseThrow(() -> {
+                    log.error("Prenotazione con ID {} non trovata", request.getId());
+                    return new NotFoundException("Prenotazione non trovata");
+                });
+
+        util.isDateValid(request.getCheckIn(), request.getCheckOut());
+
+        CheckDateStart checkDateStart = new CheckDateStart(request.getPrezzarioCamera().getNumeroCamera(),
+                request.getCheckIn().atStartOfDay());
+        if (!hotelExternalController.checkDisponibilita(checkDateStart).getBody().getResponse()) {
+            log.error("Camera non ancora disponibile per la data richiesta");
+            throw new BadRequestException("Camera non ancora disponibile");
+        }
+
+        prenotazione.setIdMetodoPagamento(request.getIdMetodoPagamento());
+        prenotazione.setCheckIn(request.getCheckIn().atStartOfDay());
+        prenotazione.setCheckOut(request.getCheckOut().atStartOfDay());
+        prenotazione.setListaEta(request.getListaEta());
+
+        PreventivoRequest preventivoRequest = util.calcolaPrezzoFinale(request);
+        request.setPrezzarioCamera(preventivoRequest.getPrezzarioCamera());
+
+        List<BigDecimal> listaPrezzi = new ArrayList<>();
+        BigDecimal prezzoParziale = BigDecimal.ZERO;
+        for (int i = request.getListaEta().size() - 1; i >= 0; i--) {
+            listaPrezzi.add(request.getPrezzarioCamera().getPrezziAPersona().get(i));
+            prezzoParziale = prezzoParziale.add(request.getPrezzarioCamera().getPrezziAPersona().get(i));
+        }
+
+        BigDecimal giorniPermanenza = BigDecimal.valueOf(util.calcolaNumeroGiorni(request.getCheckIn(), request.getCheckOut()));
+        prenotazione.setPrezziAPersona(listaPrezzi);
+        prenotazione.setPrezzoTotale(prezzoParziale.multiply(giorniPermanenza));
+
+        prenotazioneRepository.save(prenotazione);
+        log.info("Oggetto Prenotazione modificato salvato sul db: [{}]", prenotazione);
+
+        return prenotazioneMapper.fromPrenotazioneToPrenotazioneResponse(prenotazione);
+
     }
 }

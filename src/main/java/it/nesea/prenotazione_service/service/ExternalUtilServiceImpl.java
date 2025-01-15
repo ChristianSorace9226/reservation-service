@@ -1,6 +1,6 @@
 package it.nesea.prenotazione_service.service;
 
-import it.nesea.prenotazione_service.model.PrenotazioneSave;
+import it.nesea.prenotazione_service.model.Prenotazione;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -23,7 +23,7 @@ public class ExternalUtilServiceImpl implements ExternalUtilService {
     public List<String> getCamerePrenotateOggi() {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<String> cq = cb.createQuery(String.class);
-        Root<PrenotazioneSave> root = cq.from(PrenotazioneSave.class);
+        Root<Prenotazione> root = cq.from(Prenotazione.class);
 
         Predicate dataInclusaPredicate = cb.and(
                 cb.lessThanOrEqualTo(root.get("checkIn"), LocalDateTime.now()),

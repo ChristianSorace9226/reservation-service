@@ -2,7 +2,7 @@ package it.nesea.prenotazione_service.controller;
 
 import it.nesea.albergo.common_lib.dto.response.CustomResponse;
 import it.nesea.prenotazione_service.model.MaggiorazioneEntity;
-import it.nesea.prenotazione_service.model.PrenotazioneSave;
+import it.nesea.prenotazione_service.model.Prenotazione;
 import it.nesea.prenotazione_service.model.StagioneEntity;
 import it.nesea.prenotazione_service.service.FrontendUtilService;
 import lombok.AllArgsConstructor;
@@ -22,7 +22,7 @@ public class FrontendServiceController {
 
 
     @GetMapping("/get-prenotazioni")
-    public ResponseEntity<CustomResponse<List<PrenotazioneSave>>> getAllPrenotazioni() {
+    public ResponseEntity<CustomResponse<List<Prenotazione>>> getAllPrenotazioni() {
         return ResponseEntity.ok(CustomResponse.success(frontendUtilService.getAllPrenotazioni()));
     }
 

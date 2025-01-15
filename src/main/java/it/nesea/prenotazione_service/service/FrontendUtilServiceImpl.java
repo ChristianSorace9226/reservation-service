@@ -2,9 +2,9 @@ package it.nesea.prenotazione_service.service;
 
 import it.nesea.albergo.common_lib.exception.NotFoundException;
 import it.nesea.prenotazione_service.model.MaggiorazioneEntity;
-import it.nesea.prenotazione_service.model.PrenotazioneSave;
+import it.nesea.prenotazione_service.model.Prenotazione;
 import it.nesea.prenotazione_service.model.StagioneEntity;
-import it.nesea.prenotazione_service.model.repository.PrenotazioneSaveRepository;
+import it.nesea.prenotazione_service.model.repository.PrenotazioneRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -16,17 +16,17 @@ import java.util.List;
 @Service
 public class FrontendUtilServiceImpl implements FrontendUtilService {
 
-    private final PrenotazioneSaveRepository prenotazioneRepository;
+    private final PrenotazioneRepository prenotazioneRepository;
     private final EntityManager entityManager;
 
-    public FrontendUtilServiceImpl(PrenotazioneSaveRepository prenotazioneRepository, EntityManager entityManager) {
+    public FrontendUtilServiceImpl(PrenotazioneRepository prenotazioneRepository, EntityManager entityManager) {
         this.prenotazioneRepository = prenotazioneRepository;
         this.entityManager = entityManager;
     }
 
     @Override
-    public List<PrenotazioneSave> getAllPrenotazioni() {
-        List<PrenotazioneSave> prenotazioni = prenotazioneRepository.findAll();
+    public List<Prenotazione> getAllPrenotazioni() {
+        List<Prenotazione> prenotazioni = prenotazioneRepository.findAll();
         if (prenotazioni.isEmpty()) {
             throw new NotFoundException("Nessun preventivo trovato");
         }

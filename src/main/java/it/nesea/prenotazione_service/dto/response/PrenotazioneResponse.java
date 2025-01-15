@@ -21,8 +21,10 @@ public class PrenotazioneResponse implements Serializable {
     private static final long serialVersionUID = -7256012000844387838L;
 
 
+    Integer id;
     String codicePrenotazione;
     String groupId;
     List<BigDecimal> prezziAPersona;
     BigDecimal prezzoCamera;
+
 }

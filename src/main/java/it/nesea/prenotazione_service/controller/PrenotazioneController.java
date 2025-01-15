@@ -1,6 +1,7 @@
 package it.nesea.prenotazione_service.controller;
 
 import it.nesea.albergo.common_lib.dto.response.CustomResponse;
+import it.nesea.prenotazione_service.dto.request.ModificaPrenotazioneRequest;
 import it.nesea.prenotazione_service.dto.request.PrenotazioneRequest;
 import it.nesea.prenotazione_service.dto.request.PreventivoRequest;
 import it.nesea.prenotazione_service.dto.response.PrenotazioneResponse;
@@ -9,10 +10,7 @@ import it.nesea.prenotazione_service.service.PrenotazioneService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(path = "/prenotazione")
@@ -26,10 +24,14 @@ public class PrenotazioneController {
         return ResponseEntity.ok(CustomResponse.success(prenotazioneService.richiediPreventivo(request)));
     }
 
-
     @PostMapping(path = "/prenota")
     public ResponseEntity<CustomResponse<PrenotazioneResponse>> prenota(@Valid @RequestBody PrenotazioneRequest request) {
         return ResponseEntity.ok(CustomResponse.success(prenotazioneService.prenotazione(request)));
+    }
+
+    @PutMapping(path = "/modifica-prenotazione")
+    public ResponseEntity<CustomResponse<PrenotazioneResponse>> modificaPrenotazione(@Valid @RequestBody ModificaPrenotazioneRequest request) {
+        return ResponseEntity.ok(CustomResponse.success(prenotazioneService.modificaPrenotazione(request)));
     }
 
 }

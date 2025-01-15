@@ -19,7 +19,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class PrenotazioneSave implements Serializable {
+public class Prenotazione implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 108148518985424904L;
