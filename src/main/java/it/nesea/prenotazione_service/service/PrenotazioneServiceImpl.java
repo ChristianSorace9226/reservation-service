@@ -27,10 +27,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.chrono.ChronoLocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Data
@@ -50,6 +52,19 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
     @Override
     public PrenotazioneResponse prenotazione(PrenotazioneRequest request) {
         log.debug("Oggetto request in input: [{}]", request);
+
+        String numeroCamera = request.getPrezzarioCamera().getNumeroCamera();
+        Optional<Prenotazione> prenotazioneCheck = prenotazioneRepository.findByNumeroCamera(numeroCamera);
+
+        LocalDate checkIn = request.getCheckIn();
+
+        if(prenotazioneCheck.isPresent()) {
+            Prenotazione prenotazioneTrovata = prenotazioneCheck.get();
+            if ((checkIn.isAfter(ChronoLocalDate.from(prenotazioneTrovata.getCheckIn()))||checkIn.isBefore(ChronoLocalDate.from(prenotazioneTrovata.getCheckOut())))
+                    && numeroCamera.equals(prenotazioneTrovata.getNumeroCamera())) {
+                throw new BadRequestException("La prenotazione richiesta non può essere effettuata");
+            }
+        }
 
         util.isDateValid(request.getCheckIn(), request.getCheckOut());
 
