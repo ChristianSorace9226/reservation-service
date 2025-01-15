@@ -62,4 +62,13 @@ public class Prenotazione implements Serializable {
 
     @Column(name = "CODICE_PRENOTAZIONE", nullable = false)
     String codicePrenotazione;
+
+    @Column(name = "DATA_CREAZIONE", nullable = false)
+    LocalDateTime dataCreazione;
+
+    @Column(name = "DATA_ANNULLAMENTO")
+    LocalDateTime dataAnnullamento;
+
+    @Column(name = "MOTIVO_ANNULLAMENTO")
+    String motivoAnnullamento;
 }

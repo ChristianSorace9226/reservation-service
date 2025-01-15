@@ -24,6 +24,9 @@ CREATE TABLE IF NOT EXISTS prenotazione_service.prenotazione (
     check_in TIMESTAMP NOT NULL, -- Data di check-in
     check_out TIMESTAMP NOT NULL, -- Data di check-out
     lista_eta INTEGER ARRAY NOT NULL, -- Array di età
+    data_creazione TIMESTAMP NOT NULL, -- Data creazione prenotazione
+    data_annullamento TIMESTAMP, -- Data annullamento prenotazione
+    motivo_annullamento VARCHAR(50), -- Motivo annullamento della prenotazione
     id_metodo_pagamento INTEGER NOT NULL, -- ID del metodo di pagamento
     prezzo_totale DECIMAL(10,2) NOT NULL, -- ID del prezzo della camera
     prezzi_a_persona DECIMAL(10,2) ARRAY NOT NULL, -- Prezzi per ogni età

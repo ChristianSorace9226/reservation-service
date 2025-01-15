@@ -2,6 +2,7 @@ package it.nesea.prenotazione_service.util;
 
 import it.nesea.albergo.common_lib.exception.BadRequestException;
 import it.nesea.albergo.common_lib.exception.NotFoundException;
+import it.nesea.prenotazione_service.controller.feign.UserExternalController;
 import it.nesea.prenotazione_service.dto.request.PreventivoRequest;
 import it.nesea.prenotazione_service.model.StagioneEntity;
 import jakarta.persistence.EntityManager;
@@ -9,6 +10,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -19,10 +21,11 @@ import java.util.UUID;
 
 @Component
 @AllArgsConstructor
+@Slf4j
 public class Util {
 
     private final EntityManager entityManager;
-
+    private final UserExternalController userExternalController;
 
     public String generaCodicePrenotazione() {
         return UUID.randomUUID().toString();
@@ -46,6 +49,13 @@ public class Util {
             throw new IllegalArgumentException("Le date di checkIn e checkOut non possono essere null");
         }
         return ChronoUnit.DAYS.between(dataInizio, dataFine);
+    }
+
+    public void checkUtente(Integer idUtente){
+        if (!userExternalController.checkUtente(idUtente).getBody().getResponse()) {
+            log.error("Utente {} non valido", idUtente);
+            throw new NotFoundException("Utente non valido");
+        }
     }
 
     public Integer getPercentualeMaggiorazione(LocalDate checkIn, LocalDate checkOut, List<StagioneEntity> stagioni) {

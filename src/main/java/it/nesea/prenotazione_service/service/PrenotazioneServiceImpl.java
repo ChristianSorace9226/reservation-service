@@ -5,9 +5,11 @@ import it.nesea.albergo.common_lib.exception.BadRequestException;
 import it.nesea.albergo.common_lib.exception.NotFoundException;
 import it.nesea.prenotazione_service.controller.feign.HotelExternalController;
 import it.nesea.prenotazione_service.controller.feign.UserExternalController;
+import it.nesea.prenotazione_service.dto.request.AnnullaPrenotazioneRequest;
 import it.nesea.prenotazione_service.dto.request.ModificaPrenotazioneRequest;
 import it.nesea.prenotazione_service.dto.request.PrenotazioneRequest;
 import it.nesea.prenotazione_service.dto.request.PreventivoRequest;
+import it.nesea.prenotazione_service.dto.response.AnnullaPrenotazioneResponse;
 import it.nesea.prenotazione_service.dto.response.PrenotazioneResponse;
 import it.nesea.prenotazione_service.dto.response.PreventivoResponse;
 import it.nesea.prenotazione_service.mapper.PrenotazioneMapper;
@@ -19,10 +21,13 @@ import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.time.chrono.ChronoLocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,11 +43,8 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
     private final EntityManager entityManager;
     private final PreventivoMapper preventivoMapper;
     private final PrenotazioneMapper prenotazioneMapper;
-    private final UserExternalController userExternalController;
     private final PrenotazioneRepository prenotazioneRepository;
 
-
-    //todo: controllo su numero camera con stesso groupId
 
     @Transactional
     @Override
@@ -57,10 +59,7 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
             throw new BadRequestException("Camera non ancora disponibile");
         }
 
-        if (!userExternalController.checkUtente(request.getIdUtente()).getBody().getResponse()) {
-            log.error("Utente {} non valido", request.getIdUtente());
-            throw new NotFoundException("Utente non valido");
-        }
+        util.checkUtente(request.getIdUtente());
 
         Prenotazione prenotazione = new Prenotazione();
 
@@ -117,6 +116,7 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
             prenotazione.setCodicePrenotazione(util.generaCodicePrenotazione());
 
             prenotazione.setGroupId(request.getGroupId());
+            prenotazione.setDataCreazione(LocalDateTime.now());
 
             prenotazioneRepository.save(prenotazione);
             return prenotazioneMapper.fromPrenotazioneToPrenotazioneResponse(prenotazione);
@@ -126,12 +126,14 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
         request.setPrezzarioCamera(preventivoRequest.getPrezzarioCamera());
         prenotazione = prenotazioneMapper.fromPrenotazioneRequestToPrenotazione(request);
         prenotazione.setCodicePrenotazione(util.generaCodicePrenotazione());
+        prenotazione.setDataCreazione(LocalDateTime.now());
         prenotazione.setGroupId(util.generaGroupId());
 
         prenotazioneRepository.save(prenotazione);
         return prenotazioneMapper.fromPrenotazioneToPrenotazioneResponse(prenotazione);
     }
 
+    @Override
     public PreventivoResponse richiediPreventivo(PreventivoRequest request) {
         request = util.calcolaPrezzoFinale(request);
         return preventivoMapper.fromPrezzoCameraDTOToPreventivoResponse(request.getPrezzarioCamera());
@@ -182,4 +184,42 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
         return prenotazioneMapper.fromPrenotazioneToPrenotazioneResponse(prenotazione);
 
     }
+
+    @Transactional
+    @Override
+    public AnnullaPrenotazioneResponse annullaPrenotazione(AnnullaPrenotazioneRequest request) {
+        log.info("Ricevuta richiesta annullamento prenotazione [{}]", request);
+
+        util.checkUtente(request.getIdUtente());
+
+        Prenotazione prenotazione = prenotazioneRepository.findById(request.getId())
+                .orElseThrow(() -> new NotFoundException("Prenotazione non trovata"));
+
+        int giornoCheckIn = prenotazione.getCheckIn().getDayOfYear();
+        int oggi = LocalDateTime.now().getDayOfYear();
+        int percentualeRimborso = 100;
+
+        if (giornoCheckIn - oggi < 15) {
+            percentualeRimborso = 50;
+            if (giornoCheckIn - oggi < 5) {
+                percentualeRimborso = 0;
+            }
+        }
+
+        BigDecimal rimborso = prenotazione.getPrezzoTotale()
+                .multiply(BigDecimal.valueOf(percentualeRimborso)
+                        .divide(BigDecimal.valueOf(100), RoundingMode.HALF_UP));
+
+        if (request.getCancellazioneLogica() == Boolean.TRUE){
+            prenotazione.setDataAnnullamento(LocalDateTime.now());
+            prenotazione.setMotivoAnnullamento(request.getMotivoAnnullamento());
+            prenotazioneRepository.save(prenotazione);
+        }
+        else {
+            prenotazioneRepository.delete(prenotazione);
+        }
+        return new AnnullaPrenotazioneResponse(rimborso);
+
+    }
+
 }
