@@ -106,7 +106,6 @@ public class Util {
         LocalDateTime checkIn = request.getCheckIn();
         LocalDateTime checkOut = request.getCheckOut();
 
-        isDateValid(checkIn, checkOut);
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<StagioneEntity> percentualeMaggiorazioneQuery = cb.createQuery(StagioneEntity.class);
         Root<StagioneEntity> stagioneRoot = percentualeMaggiorazioneQuery.from(StagioneEntity.class);
