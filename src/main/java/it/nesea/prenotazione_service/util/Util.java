@@ -62,8 +62,7 @@ public class Util {
     }
 
     public void checkDisponibilita(String numeroCamera, LocalDateTime checkIn) {
-        CheckDateStart checkDateStart = new CheckDateStart(numeroCamera, checkIn);
-        if (!hotelExternalController.checkDisponibilita(checkDateStart).getBody().getResponse()) {
+        if (!hotelExternalController.checkDisponibilita( new CheckDateStart(numeroCamera, checkIn)).getBody().getResponse()) {
             log.error("Camera non ancora disponibile");
             throw new BadRequestException("Camera non ancora disponibile");
         }
