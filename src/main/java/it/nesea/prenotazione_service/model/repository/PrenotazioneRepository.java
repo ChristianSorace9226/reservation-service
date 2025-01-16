@@ -11,6 +11,6 @@ import java.util.Optional;
 public interface PrenotazioneRepository extends JpaRepository<Prenotazione, Integer> {
     List<Prenotazione> findByGroupId(String groupId);
 
-    Optional<Prenotazione> findByNumeroCamera(String numeroCamera);
+    List<Prenotazione> findByNumeroCamera(String numeroCamera);
 
 }

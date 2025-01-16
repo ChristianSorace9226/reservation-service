@@ -54,21 +54,41 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
         log.debug("Oggetto request in input: [{}]", request);
 
         String numeroCamera = request.getPrezzarioCamera().getNumeroCamera();
-        Optional<Prenotazione> prenotazioneCheck = prenotazioneRepository.findByNumeroCamera(numeroCamera);
-
         LocalDate checkIn = request.getCheckIn();
+        LocalDate checkOut = request.getCheckOut();
 
-        if(prenotazioneCheck.isPresent()) {
-            Prenotazione prenotazioneTrovata = prenotazioneCheck.get();
-            if ((checkIn.isAfter(ChronoLocalDate.from(prenotazioneTrovata.getCheckIn()))||checkIn.isBefore(ChronoLocalDate.from(prenotazioneTrovata.getCheckOut())))
-                    && numeroCamera.equals(prenotazioneTrovata.getNumeroCamera())) {
-                throw new BadRequestException("La prenotazione richiesta non può essere effettuata");
+        List<Prenotazione> prenotazioniEsistenti = prenotazioneRepository.findByNumeroCamera(numeroCamera);
+
+        for (Prenotazione prenotazioneTrovata : prenotazioniEsistenti) {
+            boolean isOverlapping = checkIn.isBefore(ChronoLocalDate.from(prenotazioneTrovata.getCheckOut())) &&
+                    checkOut.isAfter(ChronoLocalDate.from(prenotazioneTrovata.getCheckIn()));
+
+            if (isOverlapping) {
+                if (request.getGroupId() != null && !request.getGroupId().equals(prenotazioneTrovata.getGroupId())) {
+                    log.error("La camera è già prenotata con un groupId diverso");
+                    throw new BadRequestException("La camera è già prenotata con un groupId diverso per le date richieste");
+                }
+
+                if (request.getGroupId() != null) {
+                    int capienzaCamera = prenotazioneTrovata.getIdTipoCamera();
+                    int personePrenotate = prenotazioneTrovata.getListaEta().size();
+
+                    personePrenotate += request.getListaEta().size();
+
+                    if (personePrenotate > capienzaCamera) {
+                        log.error("Il numero di persone nel gruppo supera la capienza della camera");
+                        throw new BadRequestException("Il numero di persone nel gruppo supera la capienza della camera");
+                    }
+                } else {
+                    log.error("La camera è già prenotata per le date richieste");
+                    throw new BadRequestException("La camera è già prenotata per le date richieste");
+                }
             }
         }
 
-        util.isDateValid(request.getCheckIn(), request.getCheckOut());
+        util.isDateValid(checkIn, checkOut);
 
-        CheckDateStart checkDateStart = new CheckDateStart(request.getPrezzarioCamera().getNumeroCamera(), request.getCheckIn().atStartOfDay());
+        CheckDateStart checkDateStart = new CheckDateStart(numeroCamera, checkIn.atStartOfDay());
         if (!hotelExternalController.checkDisponibilita(checkDateStart).getBody().getResponse()) {
             log.error("Camera non ancora disponibile");
             throw new BadRequestException("Camera non ancora disponibile");
@@ -79,21 +99,21 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
         Prenotazione prenotazione = new Prenotazione();
 
         if (request.getGroupId() != null) {
-            List<Prenotazione> prenotazioniEsistenti = prenotazioneRepository.findByGroupId(request.getGroupId());
-            if (prenotazioniEsistenti.isEmpty()) {
+            List<Prenotazione> prenotazioniEsistentiGroup = prenotazioneRepository.findByGroupId(request.getGroupId());
+            if (prenotazioniEsistentiGroup.isEmpty()) {
                 log.error("Prenotazioni con groupId {} non trovate", request.getGroupId());
                 throw new NotFoundException("Prenotazioni con groupId non trovate");
             }
 
-            if (request.getCheckOut().isAfter(ChronoLocalDate.from(prenotazioniEsistenti.getFirst().getCheckOut()))) {
+            if (checkOut.isAfter(ChronoLocalDate.from(prenotazioniEsistentiGroup.get(0).getCheckOut()))) {
                 log.error("La data di check out non può essere posteriore a quella della prenotazione esistente");
                 throw new BadRequestException("La data di check out non può essere posteriore a quella della prenotazione esistente");
             }
 
-            int capienzaCamera = prenotazioniEsistenti.getFirst().getIdTipoCamera();
+            int capienzaCamera = prenotazioniEsistentiGroup.get(0).getIdTipoCamera();
 
             int personePrenotate = 0;
-            for (Prenotazione prenotazioneEsistente : prenotazioniEsistenti) {
+            for (Prenotazione prenotazioneEsistente : prenotazioniEsistentiGroup) {
                 personePrenotate += prenotazioneEsistente.getListaEta().size();
             }
 
@@ -103,7 +123,7 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
             }
 
             List<Integer> etaEsistenti = new ArrayList<>();
-            for (Prenotazione prenotazioneEsistente : prenotazioniEsistenti) {
+            for (Prenotazione prenotazioneEsistente : prenotazioniEsistentiGroup) {
                 etaEsistenti.addAll(prenotazioneEsistente.getListaEta());
             }
             List<Integer> listaEta = request.getListaEta();
@@ -112,7 +132,6 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
 
             PreventivoRequest preventivoRequest = util.calcolaPrezzoFinale(request);
             request.setPrezzarioCamera(preventivoRequest.getPrezzarioCamera());
-
 
             List<BigDecimal> listaPrezzi = new ArrayList<>();
             BigDecimal prezzoParziale = BigDecimal.ZERO;
@@ -125,7 +144,6 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
             prenotazione = prenotazioneMapper.fromPrenotazioneRequestToPrenotazione(request);
             prenotazione.setPrezziAPersona(listaPrezzi);
             prenotazione.setPrezzoTotale(prezzoParziale.multiply(giorniPermanenza));
-
 
             prenotazione.setListaEta(listaEta);
             prenotazione.setCodicePrenotazione(util.generaCodicePrenotazione());
@@ -147,6 +165,7 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
         prenotazioneRepository.save(prenotazione);
         return prenotazioneMapper.fromPrenotazioneToPrenotazioneResponse(prenotazione);
     }
+
 
     @Override
     public PreventivoResponse richiediPreventivo(PreventivoRequest request) {
