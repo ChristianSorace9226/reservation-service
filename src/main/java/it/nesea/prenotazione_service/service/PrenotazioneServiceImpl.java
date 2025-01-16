@@ -4,7 +4,6 @@ import it.nesea.albergo.common_lib.dto.request.CheckDateStart;
 import it.nesea.albergo.common_lib.exception.BadRequestException;
 import it.nesea.albergo.common_lib.exception.NotFoundException;
 import it.nesea.prenotazione_service.controller.feign.HotelExternalController;
-import it.nesea.prenotazione_service.controller.feign.UserExternalController;
 import it.nesea.prenotazione_service.dto.request.AnnullaPrenotazioneRequest;
 import it.nesea.prenotazione_service.dto.request.ModificaPrenotazioneRequest;
 import it.nesea.prenotazione_service.dto.request.PrenotazioneRequest;
@@ -21,18 +20,14 @@ import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.chrono.ChronoLocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Data
@@ -245,12 +240,11 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
                 .multiply(BigDecimal.valueOf(percentualeRimborso)
                         .divide(BigDecimal.valueOf(100), RoundingMode.HALF_UP));
 
-        if (request.getCancellazioneLogica() == Boolean.TRUE){
+        if (request.getCancellazioneLogica() == Boolean.TRUE) {
             prenotazione.setDataAnnullamento(LocalDateTime.now());
             prenotazione.setMotivoAnnullamento(request.getMotivoAnnullamento());
             prenotazioneRepository.save(prenotazione);
-        }
-        else {
+        } else {
             prenotazioneRepository.delete(prenotazione);
         }
         return new AnnullaPrenotazioneResponse(rimborso);

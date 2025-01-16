@@ -14,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -52,7 +51,7 @@ public class Util {
         return ChronoUnit.DAYS.between(dataInizio, dataFine);
     }
 
-    public void checkUtente(Integer idUtente){
+    public void checkUtente(Integer idUtente) {
         if (!userExternalController.checkUtente(idUtente).getBody().getResponse()) {
             log.error("Utente {} non valido", idUtente);
             throw new NotFoundException("Utente non valido");
