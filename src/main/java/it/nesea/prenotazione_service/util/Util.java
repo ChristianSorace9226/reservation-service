@@ -60,8 +60,8 @@ public class Util {
             throw new NotFoundException("Utente non valido");
         }
     }
-    public void checkDisponibilita(String numeroCamera, LocalDateTime checkIn){
 
+    public void checkDisponibilita(String numeroCamera, LocalDateTime checkIn) {
         CheckDateStart checkDateStart = new CheckDateStart(numeroCamera, checkIn);
         if (!hotelExternalController.checkDisponibilita(checkDateStart).getBody().getResponse()) {
             log.error("Camera non ancora disponibile");

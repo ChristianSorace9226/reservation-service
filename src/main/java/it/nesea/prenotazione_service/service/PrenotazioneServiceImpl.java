@@ -1,6 +1,5 @@
 package it.nesea.prenotazione_service.service;
 
-import it.nesea.albergo.common_lib.dto.request.CheckDateStart;
 import it.nesea.albergo.common_lib.exception.BadRequestException;
 import it.nesea.albergo.common_lib.exception.NotFoundException;
 import it.nesea.prenotazione_service.controller.feign.HotelExternalController;
@@ -179,7 +178,7 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
 
         util.isDateValid(request.getCheckIn(), request.getCheckOut());
 
-       util.checkDisponibilita(request.getPrezzarioCamera().getNumeroCamera(), request.getCheckIn());
+        util.checkDisponibilita(request.getPrezzarioCamera().getNumeroCamera(), request.getCheckIn());
 
         prenotazione.setIdMetodoPagamento(request.getIdMetodoPagamento());
         prenotazione.setCheckIn(request.getCheckIn());
