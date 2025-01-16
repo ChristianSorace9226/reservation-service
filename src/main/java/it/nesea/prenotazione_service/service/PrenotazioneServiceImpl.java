@@ -83,11 +83,7 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
 
         util.isDateValid(checkIn, checkOut);
 
-        CheckDateStart checkDateStart = new CheckDateStart(numeroCamera, checkIn);
-        if (!hotelExternalController.checkDisponibilita(checkDateStart).getBody().getResponse()) {
-            log.error("Camera non ancora disponibile");
-            throw new BadRequestException("Camera non ancora disponibile");
-        }
+        util.checkDisponibilita(numeroCamera, checkIn);
 
         util.checkUtente(request.getIdUtente());
 
@@ -165,6 +161,7 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
     @Override
     public PreventivoResponse richiediPreventivo(PreventivoRequest request) {
         util.isDateValid(request.getCheckIn(), request.getCheckOut());
+        util.checkDisponibilita(request.getPrezzarioCamera().getNumeroCamera(), request.getCheckIn());
         request = util.calcolaPrezzoFinale(request);
         return preventivoMapper.fromPrezzoCameraDTOToPreventivoResponse(request.getPrezzarioCamera());
     }
@@ -182,12 +179,7 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
 
         util.isDateValid(request.getCheckIn(), request.getCheckOut());
 
-        CheckDateStart checkDateStart = new CheckDateStart(request.getPrezzarioCamera().getNumeroCamera(),
-                request.getCheckIn());
-        if (!hotelExternalController.checkDisponibilita(checkDateStart).getBody().getResponse()) {
-            log.error("Camera non ancora disponibile per la data richiesta");
-            throw new BadRequestException("Camera non ancora disponibile");
-        }
+       util.checkDisponibilita(request.getPrezzarioCamera().getNumeroCamera(), request.getCheckIn());
 
         prenotazione.setIdMetodoPagamento(request.getIdMetodoPagamento());
         prenotazione.setCheckIn(request.getCheckIn());

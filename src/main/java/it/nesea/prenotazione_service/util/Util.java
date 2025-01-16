@@ -1,7 +1,9 @@
 package it.nesea.prenotazione_service.util;
 
+import it.nesea.albergo.common_lib.dto.request.CheckDateStart;
 import it.nesea.albergo.common_lib.exception.BadRequestException;
 import it.nesea.albergo.common_lib.exception.NotFoundException;
+import it.nesea.prenotazione_service.controller.feign.HotelExternalController;
 import it.nesea.prenotazione_service.controller.feign.UserExternalController;
 import it.nesea.prenotazione_service.dto.request.PreventivoRequest;
 import it.nesea.prenotazione_service.model.StagioneEntity;
@@ -26,6 +28,7 @@ public class Util {
 
     private final EntityManager entityManager;
     private final UserExternalController userExternalController;
+    private final HotelExternalController hotelExternalController;
 
     public String generaCodicePrenotazione() {
         return UUID.randomUUID().toString();
@@ -55,6 +58,14 @@ public class Util {
         if (!userExternalController.checkUtente(idUtente).getBody().getResponse()) {
             log.error("Utente {} non valido", idUtente);
             throw new NotFoundException("Utente non valido");
+        }
+    }
+    public void checkDisponibilita(String numeroCamera, LocalDateTime checkIn){
+
+        CheckDateStart checkDateStart = new CheckDateStart(numeroCamera, checkIn);
+        if (!hotelExternalController.checkDisponibilita(checkDateStart).getBody().getResponse()) {
+            log.error("Camera non ancora disponibile");
+            throw new BadRequestException("Camera non ancora disponibile");
         }
     }
 
