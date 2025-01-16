@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
@@ -35,16 +36,16 @@ public class Util {
         return UUID.randomUUID().toString().substring(0, 4);
     }
 
-    public void isDateValid(LocalDate checkIn, LocalDate checkOut) {
+    public void isDateValid(LocalDateTime checkIn, LocalDateTime checkOut) {
         if (checkOut.isBefore(checkIn)) {
             throw new BadRequestException("Data check out antecedente a quella di check in");
         }
-        if (checkIn.isBefore(LocalDate.now())) {
+        if (checkIn.isBefore(LocalDateTime.now())) {
             throw new BadRequestException("Data check in non può essere nel futuro");
         }
     }
 
-    public long calcolaNumeroGiorni(LocalDate dataInizio, LocalDate dataFine) {
+    public long calcolaNumeroGiorni(LocalDateTime dataInizio, LocalDateTime dataFine) {
         if (dataInizio == null || dataFine == null) {
             throw new IllegalArgumentException("Le date di checkIn e checkOut non possono essere null");
         }
@@ -58,7 +59,7 @@ public class Util {
         }
     }
 
-    public Integer getPercentualeMaggiorazione(LocalDate checkIn, LocalDate checkOut, List<StagioneEntity> stagioni) {
+    public Integer getPercentualeMaggiorazione(LocalDateTime checkIn, LocalDateTime checkOut, List<StagioneEntity> stagioni) {
 
         int meseCheckIn = checkIn.getMonthValue();
         int giornoCheckIn = checkIn.getDayOfMonth();
@@ -102,8 +103,8 @@ public class Util {
 
 
     public PreventivoRequest calcolaPrezzoFinale(PreventivoRequest request) {
-        LocalDate checkIn = request.getCheckIn();
-        LocalDate checkOut = request.getCheckOut();
+        LocalDateTime checkIn = request.getCheckIn();
+        LocalDateTime checkOut = request.getCheckOut();
 
         isDateValid(checkIn, checkOut);
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();

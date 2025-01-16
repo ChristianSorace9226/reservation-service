@@ -11,6 +11,7 @@ import lombok.experimental.FieldDefaults;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -22,10 +23,10 @@ public class PreventivoRequest implements Serializable {
     private static final long serialVersionUID = -1036202629981122611L;
 
     @NotNull(message = "è necessaria la data del check-in")
-    LocalDate checkIn;
+    LocalDateTime checkIn;
 
     @NotNull(message = "è necessaria la data del check-out")
-    LocalDate checkOut;
+    LocalDateTime checkOut;
 
     @NotNull(message = "è necessaria la lista di età")
     List<Integer> listaEta;

@@ -54,14 +54,14 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
         log.debug("Oggetto request in input: [{}]", request);
 
         String numeroCamera = request.getPrezzarioCamera().getNumeroCamera();
-        LocalDate checkIn = request.getCheckIn();
-        LocalDate checkOut = request.getCheckOut();
+        LocalDateTime checkIn = request.getCheckIn();
+        LocalDateTime checkOut = request.getCheckOut();
 
         List<Prenotazione> prenotazioniEsistenti = prenotazioneRepository.findByNumeroCamera(numeroCamera);
 
         for (Prenotazione prenotazioneTrovata : prenotazioniEsistenti) {
-            boolean isOverlapping = checkIn.isBefore(ChronoLocalDate.from(prenotazioneTrovata.getCheckOut())) &&
-                    checkOut.isAfter(ChronoLocalDate.from(prenotazioneTrovata.getCheckIn()));
+            boolean isOverlapping = checkIn.isBefore(prenotazioneTrovata.getCheckOut()) &&
+                    checkOut.isAfter(prenotazioneTrovata.getCheckIn());
 
             if (isOverlapping) {
                 if (request.getGroupId() != null && !request.getGroupId().equals(prenotazioneTrovata.getGroupId())) {
@@ -88,7 +88,7 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
 
         util.isDateValid(checkIn, checkOut);
 
-        CheckDateStart checkDateStart = new CheckDateStart(numeroCamera, checkIn.atStartOfDay());
+        CheckDateStart checkDateStart = new CheckDateStart(numeroCamera, checkIn);
         if (!hotelExternalController.checkDisponibilita(checkDateStart).getBody().getResponse()) {
             log.error("Camera non ancora disponibile");
             throw new BadRequestException("Camera non ancora disponibile");
@@ -105,12 +105,12 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
                 throw new NotFoundException("Prenotazioni con groupId non trovate");
             }
 
-            if (checkOut.isAfter(ChronoLocalDate.from(prenotazioniEsistentiGroup.get(0).getCheckOut()))) {
+            if (checkOut.isAfter(prenotazioniEsistentiGroup.getFirst().getCheckOut())) {
                 log.error("La data di check out non può essere posteriore a quella della prenotazione esistente");
                 throw new BadRequestException("La data di check out non può essere posteriore a quella della prenotazione esistente");
             }
 
-            int capienzaCamera = prenotazioniEsistentiGroup.get(0).getIdTipoCamera();
+            int capienzaCamera = prenotazioniEsistentiGroup.getFirst().getIdTipoCamera();
 
             int personePrenotate = 0;
             for (Prenotazione prenotazioneEsistente : prenotazioniEsistentiGroup) {
@@ -169,6 +169,7 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
 
     @Override
     public PreventivoResponse richiediPreventivo(PreventivoRequest request) {
+        util.isDateValid(request.getCheckIn(), request.getCheckOut());
         request = util.calcolaPrezzoFinale(request);
         return preventivoMapper.fromPrezzoCameraDTOToPreventivoResponse(request.getPrezzarioCamera());
     }
@@ -187,15 +188,15 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
         util.isDateValid(request.getCheckIn(), request.getCheckOut());
 
         CheckDateStart checkDateStart = new CheckDateStart(request.getPrezzarioCamera().getNumeroCamera(),
-                request.getCheckIn().atStartOfDay());
+                request.getCheckIn());
         if (!hotelExternalController.checkDisponibilita(checkDateStart).getBody().getResponse()) {
             log.error("Camera non ancora disponibile per la data richiesta");
             throw new BadRequestException("Camera non ancora disponibile");
         }
 
         prenotazione.setIdMetodoPagamento(request.getIdMetodoPagamento());
-        prenotazione.setCheckIn(request.getCheckIn().atStartOfDay());
-        prenotazione.setCheckOut(request.getCheckOut().atStartOfDay());
+        prenotazione.setCheckIn(request.getCheckIn());
+        prenotazione.setCheckOut(request.getCheckOut());
         prenotazione.setListaEta(request.getListaEta());
 
         PreventivoRequest preventivoRequest = util.calcolaPrezzoFinale(request);
