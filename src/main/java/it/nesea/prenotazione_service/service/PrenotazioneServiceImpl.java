@@ -81,9 +81,7 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
         }
 
         util.isDateValid(checkIn, checkOut);
-
         util.checkDisponibilita(numeroCamera, checkIn);
-
         util.checkUtente(request.getIdUtente());
 
         Prenotazione prenotazione = new Prenotazione();
@@ -162,6 +160,7 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
         util.isDateValid(request.getCheckIn(), request.getCheckOut());
         util.checkDisponibilita(request.getPrezzarioCamera().getNumeroCamera(), request.getCheckIn());
         request = util.calcolaPrezzoFinale(request);
+
         return preventivoMapper.fromPrezzoCameraDTOToPreventivoResponse(request.getPrezzarioCamera());
     }
 
