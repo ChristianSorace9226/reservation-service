@@ -1,13 +1,17 @@
 package it.nesea.prenotazione_service.controller;
 
 import it.nesea.albergo.common_lib.dto.response.CustomResponse;
+import it.nesea.prenotazione_service.dto.request.FrontendMaggiorazioneRequest;
+import it.nesea.prenotazione_service.dto.request.FrontendPrenotazioneRequest;
+import it.nesea.prenotazione_service.dto.request.FrontendStagioneRequest;
 import it.nesea.prenotazione_service.model.MaggiorazioneEntity;
 import it.nesea.prenotazione_service.model.Prenotazione;
 import it.nesea.prenotazione_service.model.StagioneEntity;
 import it.nesea.prenotazione_service.service.FrontendUtilService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,18 +25,18 @@ public class FrontendServiceController {
     private final FrontendUtilService frontendUtilService;
 
 
-    @GetMapping("/get-prenotazioni")
-    public ResponseEntity<CustomResponse<List<Prenotazione>>> getAllPrenotazioni() {
-        return ResponseEntity.ok(CustomResponse.success(frontendUtilService.getAllPrenotazioni()));
+    @PostMapping("/get-prenotazioni")
+    public ResponseEntity<CustomResponse<List<Prenotazione>>> getAllPrenotazioni(@RequestBody FrontendPrenotazioneRequest frontendPrenotazioneRequest) {
+        return ResponseEntity.ok(CustomResponse.success(frontendUtilService.getPrenotazioni(frontendPrenotazioneRequest)));
     }
 
-    @GetMapping("/get-stagioni")
-    public ResponseEntity<CustomResponse<List<StagioneEntity>>> getAllStagioni() {
-        return ResponseEntity.ok(CustomResponse.success(frontendUtilService.getAllStagioni()));
+    @PostMapping("/get-stagioni")
+    public ResponseEntity<CustomResponse<List<StagioneEntity>>> getAllStagioni(@RequestBody FrontendStagioneRequest frontendStagioneRequest) {
+        return ResponseEntity.ok(CustomResponse.success(frontendUtilService.getStagioni(frontendStagioneRequest)));
     }
 
-    @GetMapping("/get-maggiorazioni")
-    public ResponseEntity<CustomResponse<List<MaggiorazioneEntity>>> getAllMaggiorazioni() {
-        return ResponseEntity.ok(CustomResponse.success(frontendUtilService.getAllMaggiorazioni()));
+    @PostMapping("/get-maggiorazioni")
+    public ResponseEntity<CustomResponse<List<MaggiorazioneEntity>>> getAllMaggiorazioni(@RequestBody FrontendMaggiorazioneRequest frontendMaggiorazioneRequest) {
+        return ResponseEntity.ok(CustomResponse.success(frontendUtilService.getMaggiorazioni(frontendMaggiorazioneRequest)));
     }
 }

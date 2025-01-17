@@ -15,11 +15,13 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component
 @AllArgsConstructor
@@ -29,6 +31,43 @@ public class Util {
     private final EntityManager entityManager;
     private final UserExternalController userExternalController;
     private final HotelExternalController hotelExternalController;
+
+    public static <T, R> List<R> filtraRichiesta(T request, List<R> entities, Class<R> entityClass) {
+        Field[] requestFields = request.getClass().getDeclaredFields();
+
+        return entities.stream()
+                .filter(entity -> {
+                    for (Field requestField : requestFields) {
+                        try {
+                            // Ignora campi statici o non rilevanti (es: serialVersionUID)
+                            if (java.lang.reflect.Modifier.isStatic(requestField.getModifiers()) ||
+                                    java.lang.reflect.Modifier.isTransient(requestField.getModifiers())) {
+                                continue;
+                            }
+
+                            // Rendi il campo della richiesta accessibile
+                            requestField.setAccessible(true);
+                            Object requestValue = requestField.get(request);
+
+                            // Se il campo della richiesta è valorizzato, confronta
+                            if (requestValue != null) {
+                                Field entityField = entityClass.getDeclaredField(requestField.getName());
+                                entityField.setAccessible(true);
+                                Object entityValue = entityField.get(entity);
+
+                                // Se i valori non corrispondono, escludi l'entità
+                                if (!requestValue.equals(entityValue)) {
+                                    return false;
+                                }
+                            }
+                        } catch (IllegalAccessException | NoSuchFieldException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    return true; // Include l'entità se tutti i confronti passano
+                })
+                .collect(Collectors.toList());
+    }
 
     public String generaCodicePrenotazione() {
         return UUID.randomUUID().toString();
@@ -62,7 +101,7 @@ public class Util {
     }
 
     public void checkDisponibilita(String numeroCamera, LocalDateTime checkIn) {
-        if (!hotelExternalController.checkDisponibilita( new CheckDateStart(numeroCamera, checkIn)).getBody().getResponse()) {
+        if (!hotelExternalController.checkDisponibilita(new CheckDateStart(numeroCamera, checkIn)).getBody().getResponse()) {
             log.error("Camera non ancora disponibile");
             throw new BadRequestException("Camera non ancora disponibile");
         }
@@ -109,7 +148,6 @@ public class Util {
         }
         return percentualeMaggiorazione;
     }
-
 
     public PreventivoRequest calcolaPrezzoFinale(PreventivoRequest request) {
         LocalDateTime checkIn = request.getCheckIn();

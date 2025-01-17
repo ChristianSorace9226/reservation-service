@@ -1,10 +1,13 @@
 package it.nesea.prenotazione_service.service;
 
-import it.nesea.albergo.common_lib.exception.NotFoundException;
+import it.nesea.prenotazione_service.dto.request.FrontendMaggiorazioneRequest;
+import it.nesea.prenotazione_service.dto.request.FrontendPrenotazioneRequest;
+import it.nesea.prenotazione_service.dto.request.FrontendStagioneRequest;
 import it.nesea.prenotazione_service.model.MaggiorazioneEntity;
 import it.nesea.prenotazione_service.model.Prenotazione;
 import it.nesea.prenotazione_service.model.StagioneEntity;
 import it.nesea.prenotazione_service.model.repository.PrenotazioneRepository;
+import it.nesea.prenotazione_service.util.Util;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -13,48 +16,44 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static it.nesea.prenotazione_service.util.Util.filtraRichiesta;
+
 @Service
 public class FrontendUtilServiceImpl implements FrontendUtilService {
 
     private final PrenotazioneRepository prenotazioneRepository;
     private final EntityManager entityManager;
+    private final Util util;
 
-    public FrontendUtilServiceImpl(PrenotazioneRepository prenotazioneRepository, EntityManager entityManager) {
+    public FrontendUtilServiceImpl(PrenotazioneRepository prenotazioneRepository, EntityManager entityManager, Util util) {
         this.prenotazioneRepository = prenotazioneRepository;
         this.entityManager = entityManager;
+        this.util = util;
     }
 
     @Override
-    public List<Prenotazione> getAllPrenotazioni() {
+    public List<Prenotazione> getPrenotazioni(FrontendPrenotazioneRequest request) {
         List<Prenotazione> prenotazioni = prenotazioneRepository.findAll();
-        if (prenotazioni.isEmpty()) {
-            throw new NotFoundException("Nessun preventivo trovato");
-        }
-        return prenotazioni;
+        return filtraRichiesta(request, prenotazioni, Prenotazione.class);
     }
 
-    public List<StagioneEntity> getAllStagioni() {
+
+    public List<StagioneEntity> getStagioni(FrontendStagioneRequest request) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<StagioneEntity> query = cb.createQuery(StagioneEntity.class);
         Root<StagioneEntity> root = query.from(StagioneEntity.class);
         query.select(root);
         List<StagioneEntity> stagioni = entityManager.createQuery(query).getResultList();
-        if (stagioni.isEmpty()) {
-            throw new NotFoundException("Nessuna stagione trovata");
-        }
-        return stagioni;
+        return filtraRichiesta(request, stagioni, StagioneEntity.class);
     }
 
-    public List<MaggiorazioneEntity> getAllMaggiorazioni() {
+    public List<MaggiorazioneEntity> getMaggiorazioni(FrontendMaggiorazioneRequest request) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<MaggiorazioneEntity> query = cb.createQuery(MaggiorazioneEntity.class);
         Root<MaggiorazioneEntity> root = query.from(MaggiorazioneEntity.class);
         query.select(root);
         List<MaggiorazioneEntity> maggiorazioni = entityManager.createQuery(query).getResultList();
-        if (maggiorazioni.isEmpty()) {
-            throw new NotFoundException("Nessuna maggiorazione trovata");
-        }
-        return maggiorazioni;
+        return filtraRichiesta(request, maggiorazioni, MaggiorazioneEntity.class);
     }
 
 
