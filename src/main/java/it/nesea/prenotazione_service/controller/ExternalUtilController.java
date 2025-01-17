@@ -22,7 +22,7 @@ public class ExternalUtilController {
         return ResponseEntity.ok(CustomResponse.success(externalUtilService.getCamerePrenotateOggi()));
     }
 
-    @PostMapping("/get-prezzo-camera")
+    @PostMapping("/get-info-prenotazione")
     public ResponseEntity<CustomResponse<InfoPrenotazione>> getInfoPrenotazione(@RequestBody Integer idPrenotazione) {
         return ResponseEntity.ok(CustomResponse.success(externalUtilService.getInfoPrenotazione(idPrenotazione)));
     }
