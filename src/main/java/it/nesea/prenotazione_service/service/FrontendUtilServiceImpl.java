@@ -23,12 +23,10 @@ public class FrontendUtilServiceImpl implements FrontendUtilService {
 
     private final PrenotazioneRepository prenotazioneRepository;
     private final EntityManager entityManager;
-    private final Util util;
 
-    public FrontendUtilServiceImpl(PrenotazioneRepository prenotazioneRepository, EntityManager entityManager, Util util) {
+    public FrontendUtilServiceImpl(PrenotazioneRepository prenotazioneRepository, EntityManager entityManager) {
         this.prenotazioneRepository = prenotazioneRepository;
         this.entityManager = entityManager;
-        this.util = util;
     }
 
     @Override
