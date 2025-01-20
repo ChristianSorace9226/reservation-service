@@ -7,7 +7,6 @@ import it.nesea.prenotazione_service.model.MaggiorazioneEntity;
 import it.nesea.prenotazione_service.model.Prenotazione;
 import it.nesea.prenotazione_service.model.StagioneEntity;
 import it.nesea.prenotazione_service.model.repository.PrenotazioneRepository;
-import it.nesea.prenotazione_service.util.Util;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;

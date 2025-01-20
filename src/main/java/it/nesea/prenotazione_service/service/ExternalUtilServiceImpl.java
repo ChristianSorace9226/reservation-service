@@ -25,7 +25,6 @@ public class ExternalUtilServiceImpl implements ExternalUtilService {
     private final PrenotazioneRepository prenotazioneRepository;
 
 
-
     public List<String> getCamerePrenotateOggi() {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<String> cq = cb.createQuery(String.class);
@@ -45,7 +44,7 @@ public class ExternalUtilServiceImpl implements ExternalUtilService {
     public InfoPrenotazione getInfoPrenotazione(Integer idPrenotazione) {
         log.info("Oggetto request in input: {}", idPrenotazione);
         Prenotazione prenotazione = prenotazioneRepository.findById(idPrenotazione).orElseThrow(
-                ()-> new NotFoundException("Prenotazione non trovata"));
+                () -> new NotFoundException("Prenotazione non trovata"));
 
         InfoPrenotazione infoPrenotazione = new InfoPrenotazione();
         infoPrenotazione.setPrezzoTotale(prenotazione.getPrezzoTotale());

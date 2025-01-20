@@ -1,5 +1,6 @@
 package it.nesea.prenotazione_service.service;
 
+
 import it.nesea.prenotazione_service.dto.request.AnnullaPrenotazioneRequest;
 import it.nesea.prenotazione_service.dto.request.ModificaPrenotazioneRequest;
 import it.nesea.prenotazione_service.dto.request.PrenotazioneRequest;

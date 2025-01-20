@@ -1,5 +1,6 @@
 package it.nesea.prenotazione_service.controller;
 
+
 import it.nesea.albergo.common_lib.dto.response.CustomResponse;
 import it.nesea.prenotazione_service.dto.request.AnnullaPrenotazioneRequest;
 import it.nesea.prenotazione_service.dto.request.ModificaPrenotazioneRequest;
