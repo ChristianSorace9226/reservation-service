@@ -13,6 +13,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -50,6 +51,7 @@ public class ExternalUtilServiceImpl implements ExternalUtilService {
         infoPrenotazione.setPrezzoTotale(prenotazione.getPrezzoTotale());
         infoPrenotazione.setIdUtente(prenotazione.getIdUtente());
         infoPrenotazione.setIdMetodoPagamento(prenotazione.getIdMetodoPagamento());
+        infoPrenotazione.setCheckIn(LocalDate.from(prenotazione.getCheckIn()));
 
         return infoPrenotazione;
     }
