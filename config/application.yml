@@ -34,6 +34,11 @@ external-call:
       url: http://localhost:8083/api/util
       checkUtente: /check-utente
 
+  pagamento:
+    url: http://localhost:8086/api/pagamento
+    acquisisciRimborso: /acquisisci-rimborso
+
   name:
     hotel: hotel
     user: user
+    pagamento: pagamento

@@ -1,8 +1,12 @@
 package it.nesea.prenotazione_service.service;
 
+import feign.FeignException;
+import it.nesea.albergo.common_lib.dto.request.RichiediRimborso;
+import it.nesea.albergo.common_lib.dto.response.RimborsoResponse;
 import it.nesea.albergo.common_lib.exception.BadRequestException;
 import it.nesea.albergo.common_lib.exception.NotFoundException;
 import it.nesea.prenotazione_service.controller.feign.HotelExternalController;
+import it.nesea.prenotazione_service.controller.feign.PagamentoExternalController;
 import it.nesea.prenotazione_service.dto.request.AnnullaPrenotazioneRequest;
 import it.nesea.prenotazione_service.dto.request.ModificaPrenotazioneRequest;
 import it.nesea.prenotazione_service.dto.request.PrenotazioneRequest;
@@ -36,6 +40,7 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
 
     private final Util util;
     private final HotelExternalController hotelExternalController;
+    private final PagamentoExternalController pagamentoExternalController;
     private final EntityManager entityManager;
     private final PreventivoMapper preventivoMapper;
     private final PrenotazioneMapper prenotazioneMapper;
@@ -58,6 +63,10 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
                     checkOut.isAfter(prenotazioneTrovata.getCheckIn());
 
             if (isOverlapping) {
+                if (prenotazioneTrovata.getDataAnnullamento() != null) {
+                    continue;
+                }
+
                 if (request.getGroupId() != null && !request.getGroupId().equals(prenotazioneTrovata.getGroupId())) {
                     log.error("La camera è già prenotata con un groupId diverso");
                     throw new BadRequestException("La camera è già prenotata con un groupId diverso per le date richieste");
@@ -212,7 +221,7 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
 
         util.checkUtente(request.getIdUtente());
 
-        Prenotazione prenotazione = prenotazioneRepository.findById(request.getId())
+        Prenotazione prenotazione = prenotazioneRepository.findById(request.getIdPrenotazione())
                 .orElseThrow(() -> new NotFoundException("Prenotazione non trovata"));
 
         int giornoCheckIn = prenotazione.getCheckIn().getDayOfYear();
@@ -230,6 +239,10 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
                 .multiply(BigDecimal.valueOf(percentualeRimborso)
                         .divide(BigDecimal.valueOf(100), RoundingMode.HALF_UP));
 
+        RichiediRimborso richiediRimborso = new RichiediRimborso();
+        richiediRimborso.setImportoRimborso(rimborso);
+        richiediRimborso.setIdPrenotazione(request.getIdPrenotazione());
+
         if (request.getCancellazioneLogica() == Boolean.TRUE) {
             prenotazione.setDataAnnullamento(LocalDateTime.now());
             prenotazione.setMotivoAnnullamento(request.getMotivoAnnullamento());
@@ -237,7 +250,22 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
         } else {
             prenotazioneRepository.delete(prenotazione);
         }
-        return new AnnullaPrenotazioneResponse(rimborso);
+
+        AnnullaPrenotazioneResponse response = new AnnullaPrenotazioneResponse();
+
+        RimborsoResponse rimborsoResponse = pagamentoExternalController.richiediRimborso(richiediRimborso)
+                .getBody().getResponse();
+
+        if(!rimborsoResponse.getEsitoRimborso()) {
+            log.error("Rimborso non riuscito");
+            response.setMessaggio("Rimborso non riuscito");
+            response.setRimborso(BigDecimal.ZERO);
+            return response;
+        }
+
+        response.setMessaggio("Prenotazione annullata con successo");
+        response.setRimborso(rimborsoResponse.getCreditoRimborsato());
+        return response;
 
     }
 

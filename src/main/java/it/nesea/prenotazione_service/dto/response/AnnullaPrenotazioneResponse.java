@@ -14,5 +14,6 @@ import java.math.BigDecimal;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AnnullaPrenotazioneResponse {
 
+    String messaggio;
     BigDecimal rimborso;
 }

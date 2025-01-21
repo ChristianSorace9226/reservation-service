@@ -14,7 +14,7 @@ import lombok.experimental.FieldDefaults;
 public class AnnullaPrenotazioneRequest {
 
     @NotNull(message = "è richiesto l'id della prenotazione da annullare")
-    Integer id;
+    Integer idPrenotazione;
 
     @NotNull(message = "e richiesto l'id dell'utente che vuole annullare la prenotazione")
     Integer idUtente;
