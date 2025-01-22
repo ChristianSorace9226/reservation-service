@@ -23,7 +23,7 @@ public class ExternalUtilController {
     }
 
     @PostMapping("/get-info-prenotazione")
-    public ResponseEntity<CustomResponse<InfoPrenotazione>> getInfoPrenotazione(@RequestParam Integer idPrenotazione) {
+    public ResponseEntity<CustomResponse<InfoPrenotazione>> getInfoPrenotazione(@RequestBody Integer idPrenotazione) {
         return ResponseEntity.ok(CustomResponse.success(externalUtilService.getInfoPrenotazione(idPrenotazione)));
     }
 
