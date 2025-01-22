@@ -2,6 +2,7 @@ package it.nesea.prenotazione_service.service;
 
 import it.nesea.albergo.common_lib.dto.InfoPrenotazione;
 import it.nesea.albergo.common_lib.exception.NotFoundException;
+import it.nesea.prenotazione_service.mapper.PrenotazioneMapper;
 import it.nesea.prenotazione_service.model.Prenotazione;
 import it.nesea.prenotazione_service.model.repository.PrenotazioneRepository;
 import jakarta.persistence.EntityManager;
@@ -24,6 +25,7 @@ public class ExternalUtilServiceImpl implements ExternalUtilService {
 
     private final EntityManager entityManager;
     private final PrenotazioneRepository prenotazioneRepository;
+    private final PrenotazioneMapper prenotazioneMapper;
 
 
     public List<String> getCamerePrenotateOggi() {
@@ -47,13 +49,7 @@ public class ExternalUtilServiceImpl implements ExternalUtilService {
         Prenotazione prenotazione = prenotazioneRepository.findById(idPrenotazione).orElseThrow(
                 () -> new NotFoundException("Prenotazione non trovata"));
 
-        InfoPrenotazione infoPrenotazione = new InfoPrenotazione();
-        infoPrenotazione.setPrezzoTotale(prenotazione.getPrezzoTotale());
-        infoPrenotazione.setIdUtente(prenotazione.getIdUtente());
-        infoPrenotazione.setIdMetodoPagamento(prenotazione.getIdMetodoPagamento());
-        infoPrenotazione.setCheckIn(LocalDate.from(prenotazione.getCheckIn()));
-
-        return infoPrenotazione;
+        return prenotazioneMapper.fromPrenotazioneToInfoPrenotazione(prenotazione);
     }
 
 }

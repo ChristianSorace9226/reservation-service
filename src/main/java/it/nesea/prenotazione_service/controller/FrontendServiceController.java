@@ -2,9 +2,11 @@ package it.nesea.prenotazione_service.controller;
 
 import it.nesea.albergo.common_lib.dto.response.CustomResponse;
 import it.nesea.prenotazione_service.dto.request.FrontendMaggiorazioneRequest;
+import it.nesea.prenotazione_service.dto.request.FrontendMetodoPagamentoRequest;
 import it.nesea.prenotazione_service.dto.request.FrontendPrenotazioneRequest;
 import it.nesea.prenotazione_service.dto.request.FrontendStagioneRequest;
 import it.nesea.prenotazione_service.model.MaggiorazioneEntity;
+import it.nesea.prenotazione_service.model.MetodoPagamentoEntity;
 import it.nesea.prenotazione_service.model.Prenotazione;
 import it.nesea.prenotazione_service.model.StagioneEntity;
 import it.nesea.prenotazione_service.service.FrontendUtilService;
@@ -24,7 +26,6 @@ public class FrontendServiceController {
 
     private final FrontendUtilService frontendUtilService;
 
-
     @PostMapping("/get-prenotazioni")
     public ResponseEntity<CustomResponse<List<Prenotazione>>> getAllPrenotazioni(@RequestBody FrontendPrenotazioneRequest frontendPrenotazioneRequest) {
         return ResponseEntity.ok(CustomResponse.success(frontendUtilService.getPrenotazioni(frontendPrenotazioneRequest)));
@@ -38,5 +39,10 @@ public class FrontendServiceController {
     @PostMapping("/get-maggiorazioni")
     public ResponseEntity<CustomResponse<List<MaggiorazioneEntity>>> getAllMaggiorazioni(@RequestBody FrontendMaggiorazioneRequest frontendMaggiorazioneRequest) {
         return ResponseEntity.ok(CustomResponse.success(frontendUtilService.getMaggiorazioni(frontendMaggiorazioneRequest)));
+    }
+
+    @PostMapping("/get-metodi-pagamento")
+    public ResponseEntity<CustomResponse<List<MetodoPagamentoEntity>>> getAllMaggiorazioni(@RequestBody FrontendMetodoPagamentoRequest frontendMaggiorazioneRequest) {
+        return ResponseEntity.ok(CustomResponse.success(frontendUtilService.getMetodiPagamento(frontendMaggiorazioneRequest)));
     }
 }

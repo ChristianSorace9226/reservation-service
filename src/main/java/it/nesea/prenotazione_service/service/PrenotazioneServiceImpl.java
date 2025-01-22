@@ -16,7 +16,9 @@ import it.nesea.prenotazione_service.dto.response.PrenotazioneResponse;
 import it.nesea.prenotazione_service.dto.response.PreventivoResponse;
 import it.nesea.prenotazione_service.mapper.PrenotazioneMapper;
 import it.nesea.prenotazione_service.mapper.PreventivoMapper;
+import it.nesea.prenotazione_service.model.MetodoPagamentoEntity;
 import it.nesea.prenotazione_service.model.Prenotazione;
+import it.nesea.prenotazione_service.model.repository.MetodoPagamentoRepository;
 import it.nesea.prenotazione_service.model.repository.PrenotazioneRepository;
 import it.nesea.prenotazione_service.util.Util;
 import jakarta.persistence.EntityManager;
@@ -45,6 +47,7 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
     private final PreventivoMapper preventivoMapper;
     private final PrenotazioneMapper prenotazioneMapper;
     private final PrenotazioneRepository prenotazioneRepository;
+    private final MetodoPagamentoRepository metodoPagamentoRepository;
 
 
     @Transactional
@@ -92,6 +95,7 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
         util.isDateValid(checkIn, checkOut);
         util.checkDisponibilita(numeroCamera, checkIn);
         util.checkUtente(request.getIdUtente());
+        MetodoPagamentoEntity metodoPagamento = util.checkMetodoPagamento(request.getIdMetodoPagamento());
 
         Prenotazione prenotazione = new Prenotazione();
 
@@ -158,6 +162,7 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
         prenotazione.setCodicePrenotazione(util.generaCodicePrenotazione());
         prenotazione.setDataCreazione(LocalDateTime.now());
         prenotazione.setGroupId(util.generaGroupId());
+        prenotazione.setMetodoPagamento(metodoPagamento);
 
         prenotazioneRepository.save(prenotazione);
         return prenotazioneMapper.fromPrenotazioneToPrenotazioneResponse(prenotazione);
@@ -188,7 +193,7 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
 
         util.checkDisponibilita(request.getPrezzarioCamera().getNumeroCamera(), request.getCheckIn());
 
-        prenotazione.setIdMetodoPagamento(request.getIdMetodoPagamento());
+        prenotazione.setMetodoPagamento(util.checkMetodoPagamento(request.getIdMetodoPagamento()));
         prenotazione.setCheckIn(request.getCheckIn());
         prenotazione.setCheckOut(request.getCheckOut());
         prenotazione.setListaEta(request.getListaEta());

@@ -5,6 +5,7 @@ CREATE SCHEMA IF NOT EXISTS prenotazione_service;
 DROP TABLE IF EXISTS prenotazione_service.prenotazione;
 DROP TABLE IF EXISTS prenotazione_service.stagione;
 DROP TABLE IF EXISTS prenotazione_service.maggiorazione;
+DROP TABLE IF EXISTS prenotazione_service.metodo_pagamento;
 
 DROP SEQUENCE IF EXISTS prenotazione_service.seq_prenotazione;
 
@@ -14,6 +15,11 @@ INCREMENT BY 1
 MAXVALUE 9999
 NOCACHE
 NOCYCLE;
+
+CREATE TABLE prenotazione_service.metodo_pagamento (
+    id INTEGER PRIMARY KEY,
+    metodo_pagamento VARCHAR(30) NOT NULL
+);
 
 -- Creazione tabella PRENOTAZIONE (con il campo id_preventivo)
 CREATE TABLE IF NOT EXISTS prenotazione_service.prenotazione (
@@ -32,7 +38,9 @@ CREATE TABLE IF NOT EXISTS prenotazione_service.prenotazione (
     prezzi_a_persona DECIMAL(10,2) ARRAY NOT NULL, -- Prezzi per ogni età
     codice_prenotazione VARCHAR(100) NOT NULL, -- Codice della prenotazione
     group_id VARCHAR(50) NOT NULL, -- Group ID per la prenotazione
-    CONSTRAINT uq_cod_prenotazione UNIQUE (codice_prenotazione)
+    CONSTRAINT uq_cod_prenotazione UNIQUE (codice_prenotazione),
+    FOREIGN KEY (id_metodo_pagamento) REFERENCES prenotazione_service.metodo_pagamento(id)
+
 );
 
 -- Creazione della tabella MAGGIORAZIONE

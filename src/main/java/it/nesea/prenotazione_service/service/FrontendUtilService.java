@@ -1,9 +1,11 @@
 package it.nesea.prenotazione_service.service;
 
 import it.nesea.prenotazione_service.dto.request.FrontendMaggiorazioneRequest;
+import it.nesea.prenotazione_service.dto.request.FrontendMetodoPagamentoRequest;
 import it.nesea.prenotazione_service.dto.request.FrontendPrenotazioneRequest;
 import it.nesea.prenotazione_service.dto.request.FrontendStagioneRequest;
 import it.nesea.prenotazione_service.model.MaggiorazioneEntity;
+import it.nesea.prenotazione_service.model.MetodoPagamentoEntity;
 import it.nesea.prenotazione_service.model.Prenotazione;
 import it.nesea.prenotazione_service.model.StagioneEntity;
 
@@ -16,4 +18,7 @@ public interface FrontendUtilService {
     List<StagioneEntity> getStagioni(FrontendStagioneRequest frontendStagioneRequest);
 
     List<MaggiorazioneEntity> getMaggiorazioni(FrontendMaggiorazioneRequest frontendMaggiorazioneRequest);
+
+    List<MetodoPagamentoEntity> getMetodiPagamento(FrontendMetodoPagamentoRequest request);
+
 }

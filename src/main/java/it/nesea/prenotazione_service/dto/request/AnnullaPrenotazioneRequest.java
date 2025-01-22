@@ -7,11 +7,17 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AnnullaPrenotazioneRequest {
+public class AnnullaPrenotazioneRequest implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1910298696306268278L;
 
     @NotNull(message = "è richiesto l'id della prenotazione da annullare")
     Integer idPrenotazione;

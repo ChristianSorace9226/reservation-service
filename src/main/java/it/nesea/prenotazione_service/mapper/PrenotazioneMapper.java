@@ -1,5 +1,6 @@
 package it.nesea.prenotazione_service.mapper;
 
+import it.nesea.albergo.common_lib.dto.InfoPrenotazione;
 import it.nesea.albergo.common_lib.dto.PrezzoCameraDTO;
 import it.nesea.prenotazione_service.dto.request.PrenotazioneRequest;
 import it.nesea.prenotazione_service.dto.response.PrenotazioneResponse;
@@ -25,6 +26,8 @@ public abstract class PrenotazioneMapper {
     @Mapping(source = "prezzarioCamera", target = "prezziAPersona")
     @Mapping(source = "prezzarioCamera", target = "numeroCamera")
     public abstract Prenotazione fromPrenotazioneRequestToPrenotazione(PrenotazioneRequest prenotazioneRequest);
+
+    public abstract InfoPrenotazione fromPrenotazioneToInfoPrenotazione(Prenotazione prenotazione);
 
     public Integer getIdTipoCamera(PrezzoCameraDTO prezzoCameraDTO) {
         return prezzoCameraDTO.getIdTipo();
