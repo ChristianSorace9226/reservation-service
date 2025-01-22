@@ -1,6 +1,9 @@
 package it.nesea.prenotazione_service.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,7 +22,7 @@ public class MetodoPagamentoEntity {
     @Column(name = "ID", nullable = false, precision = 4)
     Integer id;
 
-    @Column(name="METODO_PAGAMENTO", nullable = false)
+    @Column(name = "METODO_PAGAMENTO", nullable = false)
     String metodoPagamento;
 
 }

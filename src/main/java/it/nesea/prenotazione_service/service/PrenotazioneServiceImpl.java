@@ -1,6 +1,5 @@
 package it.nesea.prenotazione_service.service;
 
-import feign.FeignException;
 import it.nesea.albergo.common_lib.dto.request.RichiediRimborso;
 import it.nesea.albergo.common_lib.dto.response.RimborsoResponse;
 import it.nesea.albergo.common_lib.exception.BadRequestException;
@@ -261,7 +260,7 @@ public class PrenotazioneServiceImpl implements PrenotazioneService {
         RimborsoResponse rimborsoResponse = pagamentoExternalController.richiediRimborso(richiediRimborso)
                 .getBody().getResponse();
 
-        if(!rimborsoResponse.getEsitoRimborso()) {
+        if (!rimborsoResponse.getEsitoRimborso()) {
             log.error("Rimborso non riuscito");
             response.setMessaggio("Rimborso non riuscito");
             response.setRimborso(BigDecimal.ZERO);
