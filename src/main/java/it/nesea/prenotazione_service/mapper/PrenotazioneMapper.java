@@ -27,6 +27,7 @@ public abstract class PrenotazioneMapper {
     @Mapping(source = "prezzarioCamera", target = "numeroCamera")
     public abstract Prenotazione fromPrenotazioneRequestToPrenotazione(PrenotazioneRequest prenotazioneRequest);
 
+    @Mapping(source = "id", target = "idPrenotazione")
     public abstract InfoPrenotazione fromPrenotazioneToInfoPrenotazione(Prenotazione prenotazione);
 
     public Integer getIdTipoCamera(PrezzoCameraDTO prezzoCameraDTO) {
