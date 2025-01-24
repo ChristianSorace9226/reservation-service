@@ -4,6 +4,7 @@ import it.nesea.albergo.common_lib.dto.InfoPrenotazione;
 import it.nesea.albergo.common_lib.dto.PrezzoCameraDTO;
 import it.nesea.prenotazione_service.dto.request.PrenotazioneRequest;
 import it.nesea.prenotazione_service.dto.response.PrenotazioneResponse;
+import it.nesea.prenotazione_service.model.MetodoPagamentoEntity;
 import it.nesea.prenotazione_service.model.Prenotazione;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
@@ -28,6 +29,7 @@ public abstract class PrenotazioneMapper {
     public abstract Prenotazione fromPrenotazioneRequestToPrenotazione(PrenotazioneRequest prenotazioneRequest);
 
     @Mapping(source = "id", target = "idPrenotazione")
+    @Mapping(source = "metodoPagamento", target = "idMetodoPagamento")
     public abstract InfoPrenotazione fromPrenotazioneToInfoPrenotazione(Prenotazione prenotazione);
 
     public Integer getIdTipoCamera(PrezzoCameraDTO prezzoCameraDTO) {
@@ -44,6 +46,10 @@ public abstract class PrenotazioneMapper {
 
     public String getNumeroCamera(PrezzoCameraDTO prezzoCameraDTO) {
         return prezzoCameraDTO.getNumeroCamera();
+    }
+
+    public Integer getIdMetodoPagamento(MetodoPagamentoEntity metodoPagamento) {
+        return metodoPagamento.getId();
     }
 
 
